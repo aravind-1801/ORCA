@@ -1,0 +1,131 @@
+from datetime import datetime, timezone, timedelta
+from typing import Dict, Any, List
+
+# Single source of truth for Phase 6 Demo Mode
+DEMO_TELEMETRY: Dict[str, Any] = {
+    "location": {
+        "name": "Kollam Coast",
+        "latitude": 8.88,
+        "longitude": 76.59,
+        "harbor": "Neendakara Harbor",
+    },
+    "connectivity": "online",
+    "data_mode": "demo",
+    "updated_at": datetime.now(timezone.utc).isoformat(),
+    "safety": {
+        "status": "safe",
+        "label": "Safe",
+        "favorable_text": "Favorable",
+        "color_hex": "#16A34A",
+    },
+    "weather": {
+        "wind_kmh": 14.0,
+        "wind_speed_knots": 7.6,
+        "wind_direction": "West-Southwest",
+        "wave_m": 0.8,
+        "rain": "Low",
+        "water_temp_c": 28.4,
+        "risk_level": "low",
+        "source": "IMD Coastal Radar / MOSDAC",
+    },
+    "ocean": {
+        "sea_surface_temperature_c": 28.4,
+        "chlorophyll_density": "Favorable",
+        "chlorophyll_mg_m3": 1.85,
+        "ocean_current_knots": 0.4,
+        "condition": "favorable",
+        "source": "ISRO Oceansat-3",
+        "confidence": "high",
+    },
+    "best_zone": {
+        "id": "A12",
+        "name": "Zone A-12",
+        "distance_km": 12.0,
+        "direction": "Southwest",
+        "potential": "high",
+        "course": 218,
+        "depth_m": 44,
+        "target_species": "Indian Mackerel & Sardines",
+        "est_run_time_min": 42,
+    },
+    "recommendation": {
+        "text": "Conditions are safe today. Recommended zone: 12 km southwest based on satellite chlorophyll and thermal current convergence.",
+        "malayalam": "ഇന്ന് കടൽ ശാന്തമാണ്. തെക്കുപടിഞ്ഞാറ് 12 കി.മീ മേഖലയിൽ മീൻപിടുത്തത്തിന് അനുയോജ്യം.",
+    },
+}
+
+DEMO_ZONES: List[Dict[str, Any]] = [
+    {
+        "id": "A12",
+        "code": "ZONE A-12",
+        "name": "Zone A-12",
+        "latitude": 8.795,
+        "longitude": 76.5228,
+        "distance_km": 12.0,
+        "direction": "Southwest",
+        "course_deg": 218,
+        "course_heading": "218° SSW",
+        "bottom_depth_m": 44,
+        "potential": "high",
+        "confidence": "high",
+        "source": "INCOIS PFZ-7 / Oceansat-3",
+        "target_species": ["Indian Mackerel", "Oil Sardine", "Skipjack Tuna"],
+        "diagnostics": {
+            "sea_surface_temp_c": 28.4,
+            "chlorophyll_density": "High plankton concentration",
+            "surface_wind_kmh": 14.0,
+            "wave_height_m": 0.8,
+            "bottom_depth_m": 44,
+        },
+    },
+    {
+        "id": "B04",
+        "code": "ZONE B-04",
+        "name": "Zone B-04",
+        "latitude": 8.863,
+        "longitude": 76.4271,
+        "distance_km": 18.0,
+        "direction": "West",
+        "course_deg": 264,
+        "course_heading": "264° W",
+        "bottom_depth_m": 58,
+        "potential": "moderate",
+        "confidence": "medium",
+        "source": "INCOIS PFZ-7",
+        "target_species": ["Anchovy", "Ribbonfish"],
+        "diagnostics": {
+            "sea_surface_temp_c": 28.1,
+            "chlorophyll_density": "Moderate plankton",
+            "surface_wind_kmh": 16.0,
+            "wave_height_m": 1.0,
+            "bottom_depth_m": 58,
+        },
+    },
+    {
+        "id": "C09",
+        "code": "ZONE C-09",
+        "name": "Zone C-09",
+        "latitude": 9.0244,
+        "longitude": 76.4276,
+        "distance_km": 24.0,
+        "direction": "Northwest",
+        "course_deg": 312,
+        "course_heading": "312° NW",
+        "bottom_depth_m": 62,
+        "potential": "low",
+        "confidence": "medium",
+        "source": "INCOIS PFZ-7",
+        "target_species": ["Squid", "Carangids"],
+        "diagnostics": {
+            "sea_surface_temp_c": 27.9,
+            "chlorophyll_density": "Normal ocean baseline",
+            "surface_wind_kmh": 17.0,
+            "wave_height_m": 1.1,
+            "bottom_depth_m": 62,
+        },
+    },
+]
+
+DEMO_ALERTS: List[Dict[str, Any]] = [
+    # Clean reassurance state for baseline Kollam demonstration
+]
