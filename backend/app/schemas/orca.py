@@ -75,6 +75,8 @@ class OrcaQueryResponse(BaseModel):
     data_mode: DataMode = DataMode.DEMO
     llm_used: bool = False
     llm_paraphrase_used: bool = False
+    rag_used: bool = False
+    rag_chunks: int = 0
 
 
 class AgentSummaryFactor(BaseModel):

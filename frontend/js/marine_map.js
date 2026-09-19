@@ -1,8 +1,16 @@
 /**
  * ORCA Marine Navigation Map Engine
- * Interactive, high-fidelity marine chart with Kerala coastline, bathymetry isobaths,
- * vessel tracking, PFZ fishing zones, navigation route vectors, and responsive controls.
- * Works seamlessly with Leaflet or offline Canvas/SVG nautical chart fallback.
+ * =================================
+ * Dual Engine Architecture:
+ *  1. Primary: Google Maps JavaScript API (live satellite/terrain with coastal geography).
+ *  2. Fallback: Leaflet / OpenStreetMap (guaranteed zero blank/empty screen).
+ * 
+ * Features:
+ *  - Real coastal geography, sea depth isobaths, navigation aids (lighthouses & buoys).
+ *  - Dynamic vessel position and heading orientation.
+ *  - PFZ (Potential Fishing Zone) vectors, radius circles, and interactive clicks.
+ *  - Navigation route planning from current harbor to recommended zone with distance & ETA.
+ *  - Full touch controls: Recenter, Zoom In, Zoom Out, Compass (Reset North).
  */
 
 (function () {
@@ -11,23 +19,16 @@
   class MarineMapEngine {
     constructor() {
       this.container = null;
+      this.engine = 'google'; // 'google' | 'leaflet' | 'canvas'
+      this.googleMap = null;
       this.leafletMap = null;
-      this.canvas = null;
-      this.ctx = null;
 
       // Coordinate center (default: Kollam Coast)
       this.centerLat = 8.88;
       this.centerLon = 76.59;
       this.zoom = 11;
 
-      // Pan offset for canvas mode
-      this.panX = 0;
-      this.panY = 0;
-      this.isDragging = false;
-      this.dragStartX = 0;
-      this.dragStartY = 0;
-
-      // State data
+      // Vessel state
       this.vessel = {
         name: 'Sea King II',
         reg: 'KL-02-F-491',
@@ -36,20 +37,30 @@
         heading: 218,
         speed: 6.4,
       };
+
       this.zones = [];
       this.selectedZoneId = 'A12';
       this.recommendedZoneId = 'A12';
-      this.headingDeg = 218;
+      this.isNavigating = false;
 
-      // Marine markers & layers
+      // Google Maps references
+      this.gMarkers = [];
+      this.gCircles = [];
+      this.gIsobaths = [];
+      this.gRoute = null;
+      this.gVesselMarker = null;
+      this.gConnectingLines = [];   // vessel → zone connection lines
+
+      // Leaflet references
       this.markers = [];
       this.routeLayer = null;
       this.isobathLayers = [];
+      this.lConnectingLines = [];   // vessel → zone connection lines
 
       this.isInitialized = false;
     }
 
-    init(containerId) {
+    async init(containerId) {
       this.container = document.getElementById(containerId);
       if (!this.container) return;
 
@@ -57,23 +68,71 @@
       this.container.style.position = 'relative';
       this.container.style.overflow = 'hidden';
 
-      // Try Leaflet if available
-      if (window.L && typeof window.L.map === 'function') {
+      // 1. Fetch runtime config to obtain Google Maps browser key
+      let mapsKey = window.GOOGLE_MAPS_KEY || '';
+      try {
+        if (window.orcaApi && !mapsKey) {
+          const cfg = await window.orcaApi.getConfig();
+          if (cfg && cfg.google_maps_key) {
+            mapsKey = cfg.google_maps_key;
+            window.GOOGLE_MAPS_KEY = mapsKey;
+          }
+        }
+      } catch (e) {
+        console.warn('Config fetch error for Google Maps:', e);
+      }
+
+      // 2. Attempt Google Maps initialization if key exists
+      if (mapsKey) {
         try {
-          this.initLeaflet();
-          this.isInitialized = true;
-          return;
-        } catch (e) {
-          console.warn('Leaflet init fallback to Canvas Marine Chart:', e.message);
+          await this.loadGoogleMapsScript(mapsKey);
+          if (window.google && window.google.maps) {
+            this.initGoogleMaps();
+            this.engine = 'google';
+            this.isInitialized = true;
+            this.updateEngineBadge('Google Maps');
+            this.setupLanguageListener();
+            return;
+          }
+        } catch (err) {
+          console.warn('Google Maps JS API load failed, switching to Leaflet fallback:', err.message);
         }
       }
 
-      // High-Fidelity Canvas / SVG Interactive Nautical Chart
-      this.initCanvasChart();
-      this.isInitialized = true;
+      // 3. Fallback: Leaflet / OpenStreetMap
+      if (window.L && typeof window.L.map === 'function') {
+        try {
+          this.initLeaflet();
+          this.engine = 'leaflet';
+          this.isInitialized = true;
+          this.updateEngineBadge('Leaflet (OSM)');
+          this.setupLanguageListener();
+          return;
+        } catch (e) {
+          console.warn('Leaflet init error, switching to Canvas chart:', e.message);
+        }
+      }
 
+      // 4. Final Fallback: Canvas Chart
+      this.initCanvasChart();
+      this.engine = 'canvas';
+      this.isInitialized = true;
+      this.updateEngineBadge('Canvas Vector');
+      this.setupLanguageListener();
+    }
+
+    updateEngineBadge(label) {
+      const badge = document.getElementById('map-engine-badge');
+      if (badge) {
+        badge.textContent = label;
+      }
+    }
+
+    setupLanguageListener() {
       window.addEventListener('orca:languageChanged', () => {
-        if (this.leafletMap) {
+        if (this.engine === 'google') {
+          this.renderGoogleLayers();
+        } else if (this.engine === 'leaflet') {
           this.renderLeafletLayers();
         } else {
           this.drawCanvas();
@@ -81,8 +140,297 @@
       });
     }
 
+    loadGoogleMapsScript(apiKey) {
+      return new Promise((resolve, reject) => {
+        if (window.google && window.google.maps) {
+          resolve();
+          return;
+        }
+
+        const existingScript = document.getElementById('google-maps-script');
+        if (existingScript) {
+          existingScript.onload = () => resolve();
+          existingScript.onerror = (e) => reject(e);
+          return;
+        }
+
+        // Detect Google Maps auth failure
+        window.gm_authFailure = () => {
+          console.warn('Google Maps auth failure detected. Switching to Leaflet.');
+          this.switchToLeafletFallback();
+        };
+
+        const script = document.createElement('script');
+        script.id = 'google-maps-script';
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => resolve();
+        script.onerror = (e) => reject(new Error('Google Maps script failed to load.'));
+        document.head.appendChild(script);
+
+        // Timeout fallback after 6 seconds
+        setTimeout(() => {
+          if (!window.google || !window.google.maps) {
+            reject(new Error('Google Maps load timeout.'));
+          }
+        }, 6000);
+      });
+    }
+
+    switchToLeafletFallback() {
+      if (this.engine === 'leaflet') return;
+      console.info('Activating Leaflet marine chart fallback...');
+      this.engine = 'leaflet';
+      this.clearGoogleMap();
+      this.container.innerHTML = '';
+      this.initLeaflet();
+      this.updateEngineBadge('Leaflet (Fallback)');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GOOGLE MAPS IMPLEMENTATION (PRIMARY)
+    // ─────────────────────────────────────────────────────────────────────────
+    initGoogleMaps() {
+      const g = window.google.maps;
+      this.container.innerHTML = '';
+
+      this.googleMap = new g.Map(this.container, {
+        center: { lat: this.centerLat, lng: this.centerLon },
+        zoom: this.zoom,
+        mapTypeId: 'terrain',
+        disableDefaultUI: true,
+        gestureHandling: 'greedy',
+        styles: [
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c5e2f7' }] },
+          { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#00547b' }] },
+          { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#f0f5fa' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+        ],
+      });
+
+      this.googleMap.addListener('click', () => {
+        // Deselect or close modals
+      });
+
+      this.renderGoogleLayers();
+    }
+
+    clearGoogleMap() {
+      this.gMarkers.forEach(m => m.setMap(null));
+      this.gMarkers = [];
+      this.gCircles.forEach(c => c.setMap(null));
+      this.gCircles = [];
+      this.gIsobaths.forEach(l => l.setMap(null));
+      this.gIsobaths = [];
+      this.gConnectingLines.forEach(l => l.setMap(null));
+      this.gConnectingLines = [];
+      if (this.gRoute) {
+        this.gRoute.setMap(null);
+        this.gRoute = null;
+      }
+      if (this.gVesselMarker) {
+        this.gVesselMarker.setMap(null);
+        this.gVesselMarker = null;
+      }
+    }
+
+    renderGoogleLayers() {
+      if (!this.googleMap || !window.google || !window.google.maps) return;
+      const g = window.google.maps;
+      this.clearGoogleMap();
+
+      // 1. Bathymetry Isobaths (Depth Contour Lines)
+      const isobaths = [
+        { depth: 10, offsetLon: -0.05, color: '#4a9fd4' },
+        { depth: 20, offsetLon: -0.10, color: '#2980b9' },
+        { depth: 50, offsetLon: -0.18, color: '#1a6fa8' },
+        { depth: 100, offsetLon: -0.32, color: '#0d5a8a' },
+      ];
+
+      isobaths.forEach(iso => {
+        const path = [
+          { lat: this.centerLat + 0.25, lng: this.centerLon + iso.offsetLon + 0.05 },
+          { lat: this.centerLat + 0.10, lng: this.centerLon + iso.offsetLon + 0.01 },
+          { lat: this.centerLat - 0.05, lng: this.centerLon + iso.offsetLon - 0.02 },
+          { lat: this.centerLat - 0.20, lng: this.centerLon + iso.offsetLon - 0.04 },
+        ];
+        const polyline = new g.Polyline({
+          path,
+          geodesic: true,
+          strokeColor: iso.color,
+          strokeOpacity: 0.6,
+          strokeWeight: 1.5,
+          map: this.googleMap,
+        });
+        this.gIsobaths.push(polyline);
+      });
+
+      // 2. Navigation Aids (Lighthouses & Buoys)
+      const navAids = [
+        { name: 'Harbor Lighthouse', lat: this.centerLat + 0.015, lon: this.centerLon + 0.005, icon: '🏛️' },
+        { name: 'Breakwater Light', lat: this.centerLat + 0.055, lon: this.centerLon - 0.01, icon: '💡' },
+        { name: 'PFZ Buoy C-09', lat: this.centerLat - 0.04, lon: this.centerLon - 0.07, icon: '📍' },
+      ];
+
+      navAids.forEach(aid => {
+        const marker = new g.Marker({
+          position: { lat: aid.lat, lng: aid.lon },
+          map: this.googleMap,
+          title: aid.name,
+          label: {
+            text: aid.icon,
+            fontSize: '14px',
+          },
+        });
+        this.gMarkers.push(marker);
+      });
+
+      // 3. PFZ Fishing Zones
+      const displayZones = this.zones && this.zones.length > 0 ? this.zones : [
+        { id: 'A12', code: 'Zone A-12', lat: this.centerLat - 0.08, lon: this.centerLon - 0.12, distance_km: 12, potential: 'high', target_species: 'Indian Mackerel & Sardines' },
+        { id: 'B04', code: 'Zone B-04', lat: this.centerLat + 0.12, lon: this.centerLon - 0.15, distance_km: 18, potential: 'medium', target_species: 'Yellowfin Tuna' },
+        { id: 'C09', code: 'Zone C-09', lat: this.centerLat - 0.15, lon: this.centerLon - 0.18, distance_km: 24, potential: 'medium', target_species: 'Anchovies' },
+      ];
+
+      displayZones.forEach(z => {
+        const isRec = z.id === this.recommendedZoneId || z.code === this.recommendedZoneId;
+        const isSel = z.id === this.selectedZoneId || z.code === this.selectedZoneId;
+        const zoneLat = z.latitude || z.lat || (this.centerLat - 0.08);
+        const zoneLon = z.longitude || z.lon || (this.centerLon - 0.12);
+
+        const circle = new g.Circle({
+          map: this.googleMap,
+          center: { lat: zoneLat, lng: zoneLon },
+          radius: isRec ? 3000 : 2200,
+          strokeColor: isRec ? '#009a43' : (isSel ? '#006492' : '#73787c'),
+          strokeOpacity: 0.85,
+          strokeWeight: isRec || isSel ? 2.5 : 1.5,
+          fillColor: isRec ? '#009a43' : '#006492',
+          fillOpacity: isRec ? 0.22 : 0.12,
+        });
+
+        circle.addListener('click', () => {
+          this.selectZone(z.id || z.code);
+          if (typeof window.selectMapZone === 'function') {
+            window.selectMapZone(z.id || z.code);
+          }
+        });
+
+        this.gCircles.push(circle);
+
+        // Zone Marker Label
+        const marker = new g.Marker({
+          position: { lat: zoneLat, lng: zoneLon },
+          map: this.googleMap,
+          title: z.code || z.name || 'Zone',
+          label: {
+            text: (z.code || z.id || 'PFZ').replace('Zone ', ''),
+            color: isRec ? '#005320' : '#001e2f',
+            fontWeight: 'bold',
+            fontSize: '11px',
+          },
+        });
+
+        marker.addListener('click', () => {
+          this.selectZone(z.id || z.code);
+          if (typeof window.selectMapZone === 'function') {
+            window.selectMapZone(z.id || z.code);
+          }
+        });
+
+        this.gMarkers.push(marker);
+      });
+
+      // 4. Vessel Marker
+      this.gVesselMarker = new g.Marker({
+        position: { lat: this.vessel.lat, lng: this.vessel.lon },
+        map: this.googleMap,
+        title: this.vessel.name,
+        icon: {
+          path: g.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 6,
+          fillColor: '#006492',
+          fillOpacity: 1,
+          strokeWeight: 2,
+          strokeColor: '#ffffff',
+          rotation: this.vessel.heading,
+        },
+      });
+
+      // 5. Connecting Lines (vessel → each zone)
+      displayZones.forEach(z => {
+        const isSelected = this.selectedZoneId
+          ? (z.id === this.selectedZoneId || z.code === this.selectedZoneId)
+          : (z.id === this.recommendedZoneId || z.code === this.recommendedZoneId);
+        const zoneLat = parseFloat(z.latitude || z.lat || (this.centerLat - 0.08));
+        const zoneLon = parseFloat(z.longitude || z.lon || (this.centerLon - 0.12));
+        const vLat = parseFloat(this.vessel.lat);
+        const vLon = parseFloat(this.vessel.lon);
+
+        const line = new g.Polyline({
+          path: [
+            { lat: vLat, lng: vLon },
+            { lat: zoneLat, lng: zoneLon },
+          ],
+          geodesic: true,
+          strokeColor: isSelected ? '#00c853' : '#004870',
+          strokeOpacity: isSelected ? 1.0 : 0.85,
+          strokeWeight: isSelected ? 4.5 : 2.5,
+          zIndex: isSelected ? 100 : 50,
+          map: this.googleMap,
+        });
+
+        line.addListener('click', () => {
+          this.selectZone(z.id || z.code);
+          if (typeof window.selectMapZone === 'function') {
+            window.selectMapZone(z.id || z.code);
+          }
+        });
+
+        this.gConnectingLines.push(line);
+      });
+
+      // 6. Active Navigation Route
+      if (this.isNavigating) {
+        this.renderGoogleRoute();
+      }
+    }
+
+    renderGoogleRoute() {
+      if (!this.googleMap || !window.google || !window.google.maps) return;
+      const g = window.google.maps;
+      if (this.gRoute) this.gRoute.setMap(null);
+
+      // Destination: recommended or selected zone
+      const destZone = this.zones.find(z => (z.id === this.recommendedZoneId || z.code === this.recommendedZoneId)) || this.zones[0] || {
+        latitude: this.centerLat - 0.08,
+        longitude: this.centerLon - 0.12,
+      };
+
+      const destLat = destZone.latitude || destZone.lat;
+      const destLon = destZone.longitude || destZone.lon;
+
+      this.gRoute = new g.Polyline({
+        path: [
+          { lat: this.vessel.lat, lng: this.vessel.lon },
+          { lat: destLat, lng: destLon },
+        ],
+        geodesic: true,
+        strokeColor: '#006492',
+        strokeOpacity: 0.9,
+        strokeWeight: 3.5,
+        map: this.googleMap,
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // LEAFLET IMPLEMENTATION (SEAMLESS FALLBACK)
+    // ─────────────────────────────────────────────────────────────────────────
     initLeaflet() {
       const L = window.L;
+      this.container.innerHTML = '';
       this.leafletMap = L.map(this.container, {
         center: [this.centerLat, this.centerLon],
         zoom: this.zoom,
@@ -90,16 +438,10 @@
         attributionControl: false,
       });
 
-      // Bright Basemap — OpenStreetMap (Google Maps-style light)
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap contributors',
       }).addTo(this.leafletMap);
-
-      // Handle map clicks
-      this.leafletMap.on('click', () => {
-        // deselect or close tooltip
-      });
 
       this.renderLeafletLayers();
     }
@@ -108,9 +450,9 @@
       if (!this.leafletMap || !window.L) return;
       const L = window.L;
 
-      // Clear existing
       this.markers.forEach(m => m.remove());
       this.markers = [];
+      this.lConnectingLines = [];
       if (this.routeLayer) this.routeLayer.remove();
       this.isobathLayers.forEach(l => l.remove());
       this.isobathLayers = [];
@@ -144,12 +486,9 @@
         className: 'vessel-marker-icon',
         html: `
           <div style="position:relative; width:44px; height:44px; display:flex; align-items:center; justify-content:center;">
-            <div style="position:absolute; width:40px; height:40px; border-radius:50%; background:rgba(26,111,168,0.2); animation:pulse 2s infinite;"></div>
-            <div style="width:28px; height:28px; border-radius:50%; background:#ffffff; border:2.5px solid #1a6fa8; display:flex; align-items:center; justify-content:center; transform:rotate(${this.vessel.heading}deg); box-shadow:0 2px 8px rgba(0,0,0,0.25);">
-              <span class="material-symbols-outlined" style="font-size:18px; color:#1a6fa8;">navigation</span>
-            </div>
-            <div style="position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); background:#ffffff; color:#1a6fa8; font-size:9px; font-weight:700; padding:1px 6px; border-radius:3px; white-space:nowrap; border:1px solid #1a6fa8; box-shadow:0 1px 4px rgba(0,0,0,0.15);">
-              🚢 ${this.vessel.name}
+            <div style="position:absolute; width:40px; height:40px; border-radius:50%; background:rgba(0,100,146,0.2); animation:pulse 2s infinite;"></div>
+            <div style="width:28px; height:28px; border-radius:50%; background:#ffffff; border:2.5px solid #006492; display:flex; align-items:center; justify-content:center; transform:rotate(${this.vessel.heading}deg); box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+              <span class="material-symbols-outlined" style="font-size:18px; color:#006492;">navigation</span>
             </div>
           </div>
         `,
@@ -157,541 +496,307 @@
         iconAnchor: [22, 22],
       });
 
-      const vesselMarker = L.marker([this.vessel.lat, this.vessel.lon], { icon: vesselIcon })
+      const vMarker = L.marker([this.vessel.lat, this.vessel.lon], { icon: vesselIcon })
         .addTo(this.leafletMap)
-        .on('click', () => {
-          if (window.selectZone) window.selectZone('vessel');
+        .bindTooltip(`<b>${this.vessel.name}</b><br>GPS Fixed · ${this.vessel.speed} kts`, { direction: 'top', permanent: false });
+      this.markers.push(vMarker);
+
+      // 3. Draw PFZ Zones
+      const displayZones = this.zones && this.zones.length > 0 ? this.zones : [
+        { id: 'A12', code: 'Zone A-12', lat: this.centerLat - 0.08, lon: this.centerLon - 0.12, distance_km: 12, potential: 'high', target_species: 'Indian Mackerel & Sardines' },
+        { id: 'B04', code: 'Zone B-04', lat: this.centerLat + 0.12, lon: this.centerLon - 0.15, distance_km: 18, potential: 'medium', target_species: 'Yellowfin Tuna' },
+        { id: 'C09', code: 'Zone C-09', lat: this.centerLat - 0.15, lon: this.centerLon - 0.18, distance_km: 24, potential: 'medium', target_species: 'Anchovies' },
+      ];
+
+      displayZones.forEach(z => {
+        const isRec = z.id === this.recommendedZoneId || z.code === this.recommendedZoneId;
+        const isSel = z.id === this.selectedZoneId || z.code === this.selectedZoneId;
+        const zoneLat = z.latitude || z.lat || (this.centerLat - 0.08);
+        const zoneLon = z.longitude || z.lon || (this.centerLon - 0.12);
+
+        const circle = L.circle([zoneLat, zoneLon], {
+          radius: isRec ? 3000 : 2200,
+          color: isRec ? '#009a43' : (isSel ? '#006492' : '#73787c'),
+          weight: isRec || isSel ? 2.5 : 1.5,
+          fillColor: isRec ? '#009a43' : '#006492',
+          fillOpacity: isRec ? 0.25 : 0.12,
+        }).addTo(this.leafletMap);
+
+        circle.on('click', () => {
+          this.selectZone(z.id || z.code);
+          if (typeof window.selectMapZone === 'function') {
+            window.selectMapZone(z.id || z.code);
+          }
         });
-      this.markers.push(vesselMarker);
+        this.markers.push(circle);
 
-      // 3. Draw PFZ Fishing Zones
-      const targetZone = this.zones.find(z => (z.id || z.code) === this.selectedZoneId) || this.zones[0];
-
-      this.zones.forEach(zone => {
-        const isRec = (zone.id || zone.code) === this.recommendedZoneId;
-        const isSel = (zone.id || zone.code) === this.selectedZoneId;
-        const potential = (zone.potential || 'low').toLowerCase();
-
-        const color = potential === 'high' ? '#009a43' : (potential === 'moderate' ? '#f59e0b' : '#73787c');
-        const zCode = zone.code || zone.name || zone.id;
-
-        const zoneIcon = L.divIcon({
-          className: 'zone-marker-icon',
-          html: `
-            <div style="position:relative; width:48px; height:48px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;">
-              ${isRec ? `<div style="position:absolute; width:44px; height:44px; border-radius:50%; background:rgba(0,154,67,0.25); animation:pulse 1.5s infinite;"></div>` : ''}
-              <div style="width:${isRec ? '32px' : '26px'}; height:${isRec ? '32px' : '26px'}; border-radius:50%; background:${isSel ? '#ffffff' : color}; border:2px solid ${isSel ? color : '#ffffff'}; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.35);">
-                <span class="material-symbols-outlined" style="font-size:${isRec ? '18px' : '15px'}; color:${isSel ? color : '#ffffff'};">phishing</span>
-              </div>
-              <div style="margin-top:2px; background:#ffffff; color:#1a1a1a; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; white-space:nowrap; border:1px solid ${color}; box-shadow:0 1px 4px rgba(0,0,0,0.15);">
-                ${zCode} ${isRec ? '★' : ''}
-              </div>
-            </div>
-          `,
-          iconSize: [48, 48],
-          iconAnchor: [24, 24],
+        // Marker tag
+        const tagIcon = L.divIcon({
+          className: 'zone-tag-icon',
+          html: `<div style="background:${isRec ? '#009a43' : '#006492'}; color:#ffffff; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,0.3);">${z.code || z.id}</div>`,
+          iconAnchor: [20, 10],
         });
-
-        const zMarker = L.marker([zone.latitude, zone.longitude], { icon: zoneIcon })
-          .addTo(this.leafletMap)
-          .on('click', () => {
-            if (window.selectZone) window.selectZone(zone.id || zone.code);
-          });
-        this.markers.push(zMarker);
+        const tagMarker = L.marker([zoneLat, zoneLon], { icon: tagIcon }).addTo(this.leafletMap);
+        tagMarker.on('click', () => {
+          this.selectZone(z.id || z.code);
+          if (typeof window.selectMapZone === 'function') {
+            window.selectMapZone(z.id || z.code);
+          }
+        });
+        this.markers.push(tagMarker);
       });
 
-      // 4. Draw Route from Vessel to Selected Zone
-      if (targetZone && targetZone.latitude && targetZone.longitude) {
-        this.routeLayer = L.polyline(
-          [
-            [this.vessel.lat, this.vessel.lon],
-            [targetZone.latitude, targetZone.longitude],
-          ],
+      // 4. Draw Connecting Lines (vessel → each zone)
+      displayZones.forEach(z => {
+        const isSelected = this.selectedZoneId
+          ? (z.id === this.selectedZoneId || z.code === this.selectedZoneId)
+          : (z.id === this.recommendedZoneId || z.code === this.recommendedZoneId);
+        const zoneLat = parseFloat(z.latitude || z.lat || (this.centerLat - 0.08));
+        const zoneLon = parseFloat(z.longitude || z.lon || (this.centerLon - 0.12));
+        const vLat = parseFloat(this.vessel.lat);
+        const vLon = parseFloat(this.vessel.lon);
+
+        const line = L.polyline(
+          [[vLat, vLon], [zoneLat, zoneLon]],
           {
-            color: '#009a43',
-            weight: 3,
-            dashArray: '8,6',
-            opacity: 0.9,
+            color: isSelected ? '#00c853' : '#004870',
+            weight: isSelected ? 4.5 : 2.5,
+            opacity: isSelected ? 1.0 : 0.85,
           }
         ).addTo(this.leafletMap);
+
+        line.on('click', () => {
+          this.selectZone(z.id || z.code);
+          if (typeof window.selectMapZone === 'function') {
+            window.selectMapZone(z.id || z.code);
+          }
+        });
+
+        this.lConnectingLines.push(line);
+        this.markers.push(line);
+      });
+
+      // 5. Draw Active Navigation Route
+      if (this.isNavigating) {
+        const destZone = displayZones.find(z => (z.id === this.recommendedZoneId || z.code === this.recommendedZoneId)) || displayZones[0];
+        const destLat = destZone.latitude || destZone.lat;
+        const destLon = destZone.longitude || destZone.lon;
+
+        this.routeLayer = L.polyline([
+          [this.vessel.lat, this.vessel.lon],
+          [destLat, destLon],
+        ], {
+          color: '#006492',
+          weight: 3.5,
+          dashArray: '8,6',
+          opacity: 0.9,
+        }).addTo(this.leafletMap);
       }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // CANVAS CHART FALLBACK
+    // ─────────────────────────────────────────────────────────────────────────
     initCanvasChart() {
-      this.container.innerHTML = '';
       this.canvas = document.createElement('canvas');
-      this.canvas.className = 'w-full h-full cursor-grab active:cursor-grabbing select-none';
-      this.canvas.style.display = 'block';
-      this.canvas.style.width = '100%';
-      this.canvas.style.height = '100%';
-      this.container.appendChild(this.canvas);
+      this.canvas.width = this.container.clientWidth || 360;
+      this.canvas.height = this.container.clientHeight || 500;
       this.ctx = this.canvas.getContext('2d');
-
-      // Resize listener
-      this.resizeCanvas();
-      window.addEventListener('resize', () => {
-        this.resizeCanvas();
-        this.drawCanvas();
-      });
-
-      // Interactive drag & pan
-      this.canvas.addEventListener('mousedown', (e) => {
-        this.isDragging = true;
-        this.dragStartX = e.clientX - this.panX;
-        this.dragStartY = e.clientY - this.panY;
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!this.isDragging) return;
-        this.panX = e.clientX - this.dragStartX;
-        this.panY = e.clientY - this.dragStartY;
-        this.drawCanvas();
-      });
-
-      window.addEventListener('mouseup', () => {
-        this.isDragging = false;
-      });
-
-      // Touch drag
-      this.canvas.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-          this.isDragging = true;
-          this.dragStartX = e.touches[0].clientX - this.panX;
-          this.dragStartY = e.touches[0].clientY - this.panY;
-        }
-      }, { passive: true });
-
-      this.canvas.addEventListener('touchmove', (e) => {
-        if (!this.isDragging || e.touches.length !== 1) return;
-        this.panX = e.touches[0].clientX - this.dragStartX;
-        this.panY = e.touches[0].clientY - this.dragStartY;
-        this.drawCanvas();
-      }, { passive: true });
-
-      this.canvas.addEventListener('touchend', () => {
-        this.isDragging = false;
-      });
-
-      // Click zone hit testing
-      this.canvas.addEventListener('click', (e) => {
-        const rect = this.canvas.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
-        this.handleCanvasClick(clickX, clickY);
-      });
-
+      this.container.appendChild(this.canvas);
       this.drawCanvas();
-    }
-
-    resizeCanvas() {
-      if (!this.canvas) return;
-      const rect = this.container.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      this.canvas.width = (rect.width || 400) * dpr;
-      this.canvas.height = (rect.height || 450) * dpr;
-      if (this.ctx) {
-        this.ctx.scale(dpr, dpr);
-      }
-    }
-
-    // Convert lat/lon to canvas X, Y relative to center and zoom
-    coordToPoint(lat, lon, width, height) {
-      const scale = (width / 0.6) * (this.zoom / 10);
-      const x = (width / 2) + ((lon - this.centerLon) * scale) + this.panX;
-      const y = (height / 2) - ((lat - this.centerLat) * scale) + this.panY;
-      return { x, y };
     }
 
     drawCanvas() {
       if (!this.ctx || !this.canvas) return;
-      const dpr = window.devicePixelRatio || 1;
-      const w = this.canvas.width / dpr;
-      const h = this.canvas.height / dpr;
       const ctx = this.ctx;
+      const w = this.canvas.width;
+      const h = this.canvas.height;
 
-      ctx.clearRect(0, 0, w, h);
-
-      // 1. Ocean Background Gradient (Deep Marine Blue)
-      const oceanGrad = ctx.createLinearGradient(0, 0, w, h);
-      oceanGrad.addColorStop(0, '#093548');
-      oceanGrad.addColorStop(0.5, '#072b3b');
-      oceanGrad.addColorStop(1, '#051d28');
-      ctx.fillStyle = oceanGrad;
+      // Background Sea
+      ctx.fillStyle = '#c5e2f7';
       ctx.fillRect(0, 0, w, h);
 
-      // 2. Marine Graticule / Latitude & Longitude Grid
-      ctx.strokeStyle = 'rgba(125, 201, 255, 0.08)';
-      ctx.lineWidth = 1;
-      const gridSize = 40 * (this.zoom / 10);
-      const startX = (this.panX % gridSize);
-      const startY = (this.panY % gridSize);
-
+      // Coastline on East
+      ctx.fillStyle = '#f0f5fa';
       ctx.beginPath();
-      for (let x = startX; x < w; x += gridSize) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-      }
-      for (let y = startY; y < h; y += gridSize) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-      }
-      ctx.stroke();
-
-      // 3. Kerala Coastal Landmass (Runs NW to SE on eastern side of chart)
-      ctx.save();
-      const coastPts = [
-        this.coordToPoint(this.centerLat + 0.35, this.centerLon + 0.08, w, h),
-        this.coordToPoint(this.centerLat + 0.20, this.centerLon + 0.05, w, h),
-        this.coordToPoint(this.centerLat + 0.08, this.centerLon + 0.02, w, h), // Neendakara harbor inlet
-        this.coordToPoint(this.centerLat + 0.04, this.centerLon + 0.01, w, h),
-        this.coordToPoint(this.centerLat - 0.05, this.centerLon - 0.01, w, h), // Kollam port
-        this.coordToPoint(this.centerLat - 0.20, this.centerLon - 0.03, w, h),
-        this.coordToPoint(this.centerLat - 0.35, this.centerLon - 0.06, w, h),
-      ];
-
-      ctx.beginPath();
-      ctx.moveTo(w + 50, -50);
-      ctx.lineTo(coastPts[0].x, coastPts[0].y);
-      for (let i = 1; i < coastPts.length; i++) {
-        const xc = (coastPts[i - 1].x + coastPts[i].x) / 2;
-        const yc = (coastPts[i - 1].y + coastPts[i].y) / 2;
-        ctx.quadraticCurveTo(coastPts[i - 1].x, coastPts[i - 1].y, xc, yc);
-      }
-      ctx.lineTo(coastPts[coastPts.length - 1].x, coastPts[coastPts.length - 1].y);
-      ctx.lineTo(w + 50, h + 50);
+      ctx.moveTo(w * 0.75, 0);
+      ctx.bezierCurveTo(w * 0.7, h * 0.3, w * 0.8, h * 0.7, w * 0.72, h);
+      ctx.lineTo(w, h);
+      ctx.lineTo(w, 0);
       ctx.closePath();
-
-      // Coastal land gradient (dark coastal terrain)
-      const landGrad = ctx.createLinearGradient(w / 2, 0, w, 0);
-      landGrad.addColorStop(0, '#0f2f3d');
-      landGrad.addColorStop(1, '#081c25');
-      ctx.fillStyle = landGrad;
       ctx.fill();
 
-      // Coastline Shore Accent
-      ctx.strokeStyle = '#275268';
-      ctx.lineWidth = 2.5;
+      // Coast contour
+      ctx.strokeStyle = '#a3c4dc';
+      ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Ashtamudi Lake / Estuary Inlet
-      const inlet = this.coordToPoint(this.centerLat + 0.06, this.centerLon + 0.04, w, h);
-      ctx.fillStyle = '#082533';
-      ctx.beginPath();
-      ctx.ellipse(inlet.x, inlet.y, 16, 8, -Math.PI / 4, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.restore();
+      const vX = w * 0.48;
+      const vY = h * 0.52;
 
-      // 4. Bathymetric Depth Lines & Labels
-      const curLang = window.orcaI18n ? window.orcaI18n.currentLang : 'en-IN';
-      const isobaths = [
-        { label: curLang.startsWith('ta') ? '10 மீ ஆழக்கோடு' : (curLang.startsWith('ml') ? '10 മീ ആഴരേഖ' : '10M DEPTH LINE'), offsetLon: -0.04, dash: [4, 4], color: 'rgba(0, 100, 146, 0.45)' },
-        { label: curLang.startsWith('ta') ? '20 மீ ஆழக்கோடு' : (curLang.startsWith('ml') ? '20 മീ ആഴരേഖ' : '20M DEPTH LINE'), offsetLon: -0.09, dash: [6, 6], color: 'rgba(0, 100, 146, 0.55)' },
-        { label: curLang.startsWith('ta') ? '50 மீ ஆழக்கோடு' : (curLang.startsWith('ml') ? '50 മീ ആഴരേഖ' : '50M ISOBATH'), offsetLon: -0.17, dash: [8, 6], color: 'rgba(0, 84, 123, 0.5)' },
-        { label: curLang.startsWith('ta') ? '100 மீ கண்டத்திட்டு' : (curLang.startsWith('ml') ? '100 മീ വൻകരത്തട്ട്' : '100M SHELF BREAK'), offsetLon: -0.28, dash: [10, 8], color: 'rgba(0, 62, 92, 0.45)' },
+      // Draw Zones & Connecting lines from vessel
+      const canvasZones = [
+        { id: 'A12', name: 'A-12', x: vX - 95, y: vY + 80 },
+        { id: 'B04', name: 'B-04', x: vX - 115, y: vY - 15 },
+        { id: 'C09', name: 'C-09', x: vX - 75, y: vY - 90 },
       ];
 
-      isobaths.forEach(iso => {
-        ctx.save();
-        ctx.strokeStyle = iso.color;
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash(iso.dash);
+      canvasZones.forEach(z => {
+        const isSel = this.selectedZoneId
+          ? (z.id === this.selectedZoneId)
+          : (z.id === this.recommendedZoneId);
 
-        const p1 = this.coordToPoint(this.centerLat + 0.35, this.centerLon + iso.offsetLon + 0.06, w, h);
-        const p2 = this.coordToPoint(this.centerLat, this.centerLon + iso.offsetLon, w, h);
-        const p3 = this.coordToPoint(this.centerLat - 0.35, this.centerLon + iso.offsetLon - 0.05, w, h);
-
+        // Connecting line
         ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.quadraticCurveTo(p2.x, p2.y, p3.x, p3.y);
+        ctx.moveTo(vX, vY);
+        ctx.lineTo(z.x, z.y);
+        ctx.strokeStyle = isSel ? '#00c853' : '#004870';
+        ctx.lineWidth = isSel ? 4.5 : 2.5;
         ctx.stroke();
-
-        // Label along the curve
-        ctx.fillStyle = 'rgba(125, 201, 255, 0.65)';
-        ctx.font = 'bold 9px Space Grotesk, sans-serif';
-        ctx.fillText(iso.label, p2.x + 8, p2.y - 4);
-        ctx.restore();
-      });
-
-      // 5. Land Labels (Dynamic per location preset & language)
-      const harborPt = this.coordToPoint(this.centerLat + 0.05, this.centerLon + 0.015, w, h);
-      ctx.fillStyle = '#b5c9d8';
-      ctx.font = '600 10px Inter, sans-serif';
-
-      let harborText = '⚓ Neendakara Harbor';
-      let portText = '🏛 Kollam Port';
-
-      if (this.centerLat > 12.0) { // Chennai
-        harborText = curLang.startsWith('ta') ? '⚓ காசிமேடு துறைமுகம்' : (curLang.startsWith('ml') ? '⚓ കാശിമേട് ഹാർബർ' : '⚓ Kasimedu Fishing Harbor');
-        portText = curLang.startsWith('ta') ? '🏛 சென்னை துறைமுகம்' : (curLang.startsWith('ml') ? '🏛 ചെന്നൈ പോർട്ട്' : '🏛 Chennai Port');
-      } else if (this.centerLat > 9.7) { // Kochi
-        harborText = curLang.startsWith('ta') ? '⚓ கொச்சி துறைமுகம்' : (curLang.startsWith('ml') ? '⚓ കൊച്ചി ഹാർബർ' : '⚓ Kochi Harbor');
-        portText = curLang.startsWith('ta') ? '🏛 போர்ட் கொச்சி' : (curLang.startsWith('ml') ? '🏛 ഫോർട്ട് കൊച്ചി' : '🏛 Fort Kochi Port');
-      } else if (this.centerLat > 9.2) { // Alappuzha
-        harborText = curLang.startsWith('ta') ? '⚓ ஆலப்புழை துறைமுகம்' : (curLang.startsWith('ml') ? '⚓ ആലപ്പുഴ ഹാർബർ' : '⚓ Alappuzha Port');
-        portText = curLang.startsWith('ta') ? '🏛 ஆலப்புழை கடலோரம்' : (curLang.startsWith('ml') ? '🏛 ആലപ്പുഴ പോർട്ട്' : '🏛 Alappuzha Coast');
-      } else if (this.centerLat < 8.7) { // Vizhinjam / TVM
-        harborText = curLang.startsWith('ta') ? '⚓ விழிஞ்சம் துறைமுகம்' : (curLang.startsWith('ml') ? '⚓ വിഴിഞ്ഞം ഹാർബർ' : '⚓ Vizhinjam Seaport');
-        portText = curLang.startsWith('ta') ? '🏛 திருவனந்தபுரம்' : (curLang.startsWith('ml') ? '🏛 തിരുവനന്തപുരം' : '🏛 Thiruvananthapuram');
-      } else { // Kollam
-        harborText = curLang.startsWith('ta') ? '⚓ நீண்டகரை துறைமுகம்' : (curLang.startsWith('ml') ? '⚓ നീണ്ടകര ഹാർബർ' : '⚓ Neendakara Harbor');
-        portText = curLang.startsWith('ta') ? '🏛 கொல்லம் துறைமுகம்' : (curLang.startsWith('ml') ? '🏛 കൊല്ലം പോർട്ട്' : '🏛 Kollam Port');
-      }
-
-      ctx.fillText(harborText, harborPt.x + 8, harborPt.y);
-      const portPt = this.coordToPoint(this.centerLat - 0.03, this.centerLon - 0.005, w, h);
-      ctx.fillText(portText, portPt.x + 8, portPt.y);
-
-
-      // 6. Navigation Course Vector (from Vessel to Selected Zone)
-      const targetZone = this.zones.find(z => (z.id || z.code) === this.selectedZoneId) || this.zones[0];
-      const vPt = this.coordToPoint(this.vessel.lat, this.vessel.lon, w, h);
-
-      if (targetZone) {
-        const zPt = this.coordToPoint(targetZone.latitude, targetZone.longitude, w, h);
-
-        ctx.save();
-        ctx.strokeStyle = '#009a43';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([8, 6]);
-        ctx.beginPath();
-        ctx.moveTo(vPt.x, vPt.y);
-        ctx.lineTo(zPt.x, zPt.y);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Course annotation pill along vector
-        const midX = (vPt.x + zPt.x) / 2;
-        const midY = (vPt.y + zPt.y) / 2;
-        ctx.fillStyle = 'rgba(11, 31, 42, 0.9)';
-        ctx.strokeStyle = '#009a43';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.roundRect(midX - 38, midY - 10, 76, 20, 4);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#7ffc97';
-        ctx.font = 'bold 9px Space Grotesk, sans-serif';
-        ctx.textAlign = 'center';
-        const distStr = curLang.startsWith('ta') ? `218° · 12 கி.மீ` : (curLang.startsWith('ml') ? `218° · 12 കി.മീ` : `218° · 12 km`);
-        ctx.fillText(distStr, midX, midY + 3);
-        ctx.textAlign = 'left';
-        ctx.restore();
-      }
-
-      // 7. Render Zones
-      this.zones.forEach(zone => {
-        const pt = this.coordToPoint(zone.latitude, zone.longitude, w, h);
-        const isRec = (zone.id || zone.code) === this.recommendedZoneId;
-        const isSel = (zone.id || zone.code) === this.selectedZoneId;
-        const potential = (zone.potential || 'low').toLowerCase();
-
-        const color = potential === 'high' ? '#009a43' : (potential === 'moderate' ? '#f59e0b' : '#73787c');
-        const radius = isRec ? 16 : 13;
-
-        // Pulsing radar ring for recommended zone
-        if (isRec) {
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, radius + 8, 0, 2 * Math.PI);
-          ctx.fillStyle = 'rgba(0, 154, 67, 0.25)';
-          ctx.fill();
-          ctx.restore();
-        }
 
         // Zone circle
-        ctx.save();
         ctx.beginPath();
-        ctx.arc(pt.x, pt.y, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = isSel ? '#ffffff' : color;
+        ctx.arc(z.x, z.y, isSel ? 20 : 15, 0, Math.PI * 2);
+        ctx.fillStyle = isSel ? 'rgba(0, 200, 83, 0.25)' : 'rgba(0, 72, 112, 0.2)';
         ctx.fill();
-        ctx.strokeStyle = isSel ? color : '#ffffff';
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = isSel ? '#00c853' : '#004870';
+        ctx.lineWidth = isSel ? 3 : 2;
         ctx.stroke();
 
-        // Zone text code
-        ctx.fillStyle = isSel ? color : '#ffffff';
-        ctx.font = 'bold 9px Space Grotesk, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const codeShort = (zone.code || zone.id || 'A12').replace('Zone ', '');
-        ctx.fillText(codeShort, pt.x, pt.y);
-
-        // Badge label below
-        ctx.font = 'bold 8px Inter, sans-serif';
-        const badgeTxt = isRec ? 'HIGH POTENTIAL' : (potential === 'moderate' ? 'MODERATE' : 'NORMAL');
-        const badgeW = ctx.measureText(badgeTxt).width + 8;
-
-        ctx.fillStyle = 'rgba(11, 28, 48, 0.9)';
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.roundRect(pt.x - (badgeW / 2), pt.y + radius + 3, badgeW, 14, 3);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(badgeTxt, pt.x, pt.y + radius + 10);
-        ctx.restore();
+        // Zone label
+        ctx.fillStyle = isSel ? '#005320' : '#001e2f';
+        ctx.font = 'bold 10px Inter, sans-serif';
+        ctx.fillText(z.name, z.x - 10, z.y + 4);
       });
 
-      // 8. Render Vessel (Own Boat)
-      ctx.save();
-      // Animated pulse ring
+      // Vessel
+      ctx.fillStyle = '#006492';
       ctx.beginPath();
-      ctx.arc(vPt.x, vPt.y, 22, 0, 2 * Math.PI);
-      ctx.fillStyle = 'rgba(125, 201, 255, 0.2)';
+      ctx.arc(vX, vY, 11, 0, Math.PI * 2);
       ctx.fill();
-
-      // Vessel body
-      ctx.beginPath();
-      ctx.arc(vPt.x, vPt.y, 14, 0, 2 * Math.PI);
-      ctx.fillStyle = '#0b1f2a';
-      ctx.fill();
-      ctx.strokeStyle = '#7dc9ff';
+      ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2.5;
       ctx.stroke();
-
-      // Direction vector arrow
-      const headingRad = (this.vessel.heading - 90) * (Math.PI / 180);
-      const tipX = vPt.x + Math.cos(headingRad) * 12;
-      const tipY = vPt.y + Math.sin(headingRad) * 12;
-
-      ctx.beginPath();
-      ctx.moveTo(tipX, tipY);
-      ctx.lineTo(vPt.x + Math.cos(headingRad + 2.5) * 8, vPt.y + Math.sin(headingRad + 2.5) * 8);
-      ctx.lineTo(vPt.x, vPt.y);
-      ctx.lineTo(vPt.x + Math.cos(headingRad - 2.5) * 8, vPt.y + Math.sin(headingRad - 2.5) * 8);
-      ctx.closePath();
-      ctx.fillStyle = '#7dc9ff';
-      ctx.fill();
-
-      // Vessel Label Pill
-      ctx.fillStyle = '#0b1f2a';
-      ctx.strokeStyle = '#7dc9ff';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(vPt.x - 38, vPt.y + 18, 76, 16, 3);
-      ctx.fill();
-      ctx.stroke();
-
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 8px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`🚤 ${this.vessel.name}`, vPt.x, vPt.y + 26);
-      ctx.restore();
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.fillText('Sea King II', vX - 28, vY + 26);
     }
 
-    handleCanvasClick(x, y) {
-      if (!this.canvas) return;
-      const dpr = window.devicePixelRatio || 1;
-      const w = this.canvas.width / dpr;
-      const h = this.canvas.height / dpr;
-
-      // Check vessel click
-      const vPt = this.coordToPoint(this.vessel.lat, this.vessel.lon, w, h);
-      const vDist = Math.hypot(x - vPt.x, y - vPt.y);
-      if (vDist <= 24) {
-        if (window.selectZone) window.selectZone('vessel');
-        return;
-      }
-
-      // Check zone clicks
-      for (const zone of this.zones) {
-        const zPt = this.coordToPoint(zone.latitude, zone.longitude, w, h);
-        const zDist = Math.hypot(x - zPt.x, y - zPt.y);
-        if (zDist <= 24) {
-          if (window.selectZone) window.selectZone(zone.id || zone.code);
-          return;
-        }
-      }
-    }
-
+    // ─────────────────────────────────────────────────────────────────────────
+    // CONTROLS & API ACTIONS
+    // ─────────────────────────────────────────────────────────────────────────
     setCenter(lat, lon) {
-      this.centerLat = lat;
-      this.centerLon = lon;
-      this.vessel.lat = lat;
-      this.vessel.lon = lon;
-      this.panX = 0;
-      this.panY = 0;
+      this.centerLat = parseFloat(lat);
+      this.centerLon = parseFloat(lon);
+      this.vessel.lat = this.centerLat;
+      this.vessel.lon = this.centerLon;
 
-      if (this.leafletMap) {
-        this.leafletMap.setView([lat, lon], this.zoom);
+      if (this.engine === 'google' && this.googleMap) {
+        this.googleMap.setCenter({ lat: this.centerLat, lng: this.centerLon });
+        this.renderGoogleLayers();
+      } else if (this.engine === 'leaflet' && this.leafletMap) {
+        this.leafletMap.setView([this.centerLat, this.centerLon], this.zoom);
         this.renderLeafletLayers();
-      } else {
+      } else if (this.engine === 'canvas') {
         this.drawCanvas();
       }
     }
 
-    setZones(zones, recommendedZoneId) {
+    setZones(zones, recommendedId = 'A12') {
       this.zones = zones || [];
-      if (recommendedZoneId) this.recommendedZoneId = recommendedZoneId;
-      if (this.leafletMap) {
+      this.recommendedZoneId = recommendedId;
+      if (this.engine === 'google') {
+        this.renderGoogleLayers();
+        this.fitBoundsToZones();
+      } else if (this.engine === 'leaflet') {
         this.renderLeafletLayers();
-      } else {
+        this.fitBoundsToZones();
+      } else if (this.engine === 'canvas') {
         this.drawCanvas();
+      }
+    }
+
+    fitBoundsToZones() {
+      const displayZones = this.zones && this.zones.length > 0 ? this.zones : [];
+      if (this.engine === 'google' && this.googleMap && window.google && window.google.maps) {
+        const g = window.google.maps;
+        const bounds = new g.LatLngBounds();
+        bounds.extend({ lat: parseFloat(this.vessel.lat), lng: parseFloat(this.vessel.lon) });
+        displayZones.forEach(z => {
+          const zLat = parseFloat(z.latitude || z.lat);
+          const zLon = parseFloat(z.longitude || z.lon);
+          if (!isNaN(zLat) && !isNaN(zLon)) bounds.extend({ lat: zLat, lng: zLon });
+        });
+        if (!bounds.isEmpty()) {
+          this.googleMap.fitBounds(bounds, { top: 60, bottom: 120, left: 40, right: 40 });
+        }
+      } else if (this.engine === 'leaflet' && this.leafletMap && window.L) {
+        const pts = [[parseFloat(this.vessel.lat), parseFloat(this.vessel.lon)]];
+        displayZones.forEach(z => {
+          const zLat = parseFloat(z.latitude || z.lat);
+          const zLon = parseFloat(z.longitude || z.lon);
+          if (!isNaN(zLat) && !isNaN(zLon)) pts.push([zLat, zLon]);
+        });
+        if (pts.length > 1) {
+          this.leafletMap.fitBounds(pts, { padding: [40, 40] });
+        }
       }
     }
 
     selectZone(zoneId) {
       this.selectedZoneId = zoneId;
-      if (this.leafletMap) {
+      if (this.engine === 'google') {
+        this.renderGoogleLayers();
+      } else if (this.engine === 'leaflet') {
         this.renderLeafletLayers();
-      } else {
-        this.drawCanvas();
       }
     }
 
-    zoomIn() {
-      if (this.leafletMap) {
-        this.leafletMap.zoomIn();
-      } else {
-        this.zoom = Math.min(this.zoom + 1.2, 18);
-        this.drawCanvas();
-      }
-    }
-
-    zoomOut() {
-      if (this.leafletMap) {
-        this.leafletMap.zoomOut();
-      } else {
-        this.zoom = Math.max(this.zoom - 1.2, 6);
-        this.drawCanvas();
+    startNavigation() {
+      this.isNavigating = true;
+      if (this.engine === 'google') {
+        this.renderGoogleRoute();
+      } else if (this.engine === 'leaflet') {
+        this.renderLeafletLayers();
       }
     }
 
     recenter() {
-      this.panX = 0;
-      this.panY = 0;
-      this.zoom = 11;
-      if (this.leafletMap) {
-        this.leafletMap.setView([this.vessel.lat, this.vessel.lon], 11);
-      } else {
-        this.drawCanvas();
+      this.setCenter(this.vessel.lat, this.vessel.lon);
+    }
+
+    zoomIn() {
+      this.zoom = Math.min(this.zoom + 1, 18);
+      if (this.engine === 'google' && this.googleMap) {
+        this.googleMap.setZoom(this.zoom);
+      } else if (this.engine === 'leaflet' && this.leafletMap) {
+        this.leafletMap.setZoom(this.zoom);
       }
     }
 
-    orientNorth() {
-      if (this.leafletMap) {
-        this.leafletMap.setBearing ? this.leafletMap.setBearing(0) : this.recenter();
-      } else {
-        this.panX = 0;
-        this.panY = 0;
-        this.drawCanvas();
+    zoomOut() {
+      this.zoom = Math.max(this.zoom - 1, 4);
+      if (this.engine === 'google' && this.googleMap) {
+        this.googleMap.setZoom(this.zoom);
+      } else if (this.engine === 'leaflet' && this.leafletMap) {
+        this.leafletMap.setZoom(this.zoom);
+      }
+    }
+
+    resetNorth() {
+      if (this.engine === 'google' && this.googleMap) {
+        this.googleMap.setHeading(0);
       }
     }
 
     resize() {
-      if (this.leafletMap) {
+      if (this.engine === 'google' && this.googleMap) {
+        window.google.maps.event.trigger(this.googleMap, 'resize');
+      } else if (this.engine === 'leaflet' && this.leafletMap) {
         this.leafletMap.invalidateSize();
-      } else if (this.canvas) {
-        this.resizeCanvas();
-        this.drawCanvas();
       }
     }
   }
 
   window.orcaMarineMap = new MarineMapEngine();
 })();
-

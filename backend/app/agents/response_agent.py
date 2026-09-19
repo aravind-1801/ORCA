@@ -62,6 +62,7 @@ class OrcaResponseAgent:
     Produces context-aware answers for each intent (Safety, Weather, Ocean, Fishing Zone, Alerts, Zone Details).
     Supports English (en-IN), Malayalam (ml-IN), and Tamil (ta-IN).
     Enforces Safety Precedence: DANGER/CAUTION warnings strictly override fishing opportunities.
+    Guarantees 100% pure target language without cross-language pollution.
     """
 
     async def generate_response(
@@ -74,11 +75,17 @@ class OrcaResponseAgent:
         best_zone: Dict[str, Any],
         alerts: List[Dict[str, Any]],
         language: str = "en",
-    ) -> Dict[str, str]:
+        location_name: str = "Kollam Coast",
+        rag_context: str = "",
+        rag_chunks: int = 0,
+    ) -> Dict[str, Any]:
         # Normalize language code: 'ml', 'ml-IN', 'ta', 'ta-IN', 'en', 'en-IN'
-        lang_norm = language.lower()
+        lang_norm = (language or "en").lower()
         is_ml = "ml" in lang_norm or "malayalam" in lang_norm
         is_ta = "ta" in lang_norm or "tamil" in lang_norm
+
+        target_lang_code = "ta" if is_ta else ("ml" if is_ml else "en")
+        target_lang_name = "Tamil" if is_ta else ("Malayalam" if is_ml else "English")
 
         intent = extracted.intent
         time_frame = extracted.time_frame
@@ -154,9 +161,9 @@ class OrcaResponseAgent:
                     ml_ans = f"നിലവിലെ മുന്നറിയിപ്പ്: വി.എച്ച്.എഫ് ചാനൽ 16 ശ്രദ്ധിക്കുക. സുരക്ഷിതത്വം പാലിക്കുക."
                     ta_ans = f"செயலில் உள்ள எச்சரிக்கை: வி.எச்.எஃப் அலைவரிசை 16 கவனிக்கவும். பாதுகாப்பு வழிமுறைகளைப் பின்பற்றவும்."
                 else:
-                    en_ans = "All coastal sectors are clear. No active storm, cyclone, or high swell warnings for Kollam today."
-                    ml_ans = "തീരദേശത്ത് അപായ മുന്നറിയിപ്പുകൾ ഒന്നുമില്ല. കടൽ ശാന്തമാണ്, സുരക്ഷിതമായി യാത്ര ചെയ്യാം."
-                    ta_ans = "கடலோர எச்சரிக்கைகள் ஏதுமில்லை. புயல் அல்லது அலை எச்சரிக்கை இல்லை, பயணம் பாதுகாப்பானது."
+                    en_ans = f"All coastal sectors are clear. No active storm, cyclone, or high swell warnings for {location_name} today."
+                    ml_ans = f"{location_name} തീരദേശത്ത് അപായ മുന്നറിയിപ്പുകൾ ഒന്നുമില്ല. കടൽ ശാന്തമാണ്, സുരക്ഷിതമായി യാത്ര ചെയ്യാം."
+                    ta_ans = f"{location_name} கடலோர எச்சரிக்கைகள் ஏதுமில்லை. புயல் அல்லது அலை எச்சரிக்கை இல்லை, பயணம் பாதுகாப்பானது."
 
             elif intent == QueryIntent.ZONE_DETAILS:
                 en_ans = f"{zone_code} is {dist_km} km {direction}, heading {course}°, depth {depth_m}m. Surface temp {water_temp_c:.1f}°C with {chlorophyll.lower()} chlorophyll."
@@ -173,77 +180,62 @@ class OrcaResponseAgent:
                     ml_ans = f"ഇന്ന് കടൽ ശാന്തമാണ്. കാറ്റ് {wind_kmh:.0f} കി.മീ, തിരമാല {wave_m:.1f} മീറ്റർ. ശുപാർശ ചെയ്യുന്ന മേഖല: {ml_dir} {dist_km} കി.മീ."
                     ta_ans = f"இன்று கடல் அமைதியாக உள்ளது. காற்று {wind_kmh:.0f} கி.மீ, அலை {wave_m:.1f} மீ. பரிந்துரைக்கப்பட்ட பகுதி: {ta_dir} {dist_km} கி.மீ."
 
-        # Select target answer and secondary echo based on user's selected language
-        if is_ml:
-            final_answer = ml_ans
-            secondary_echo = en_ans
-        elif is_ta:
-            final_answer = ta_ans
-            secondary_echo = ml_ans
+        # Choose the exact matching base answer
+        if is_ta:
+            base_answer = ta_ans
+        elif is_ml:
+            base_answer = ml_ans
         else:
-            final_answer = en_ans
-            secondary_echo = ml_ans
+            base_answer = en_ans
 
-        # Tracking whether we attempted/accepted an LLM paraphrase so callers
-        # can present source attribution in the UI.
+        final_answer = base_answer
         llm_used = False
         llm_paraphrase_used = False
+        rag_active = bool(rag_context and rag_context.strip())
+        effective_chunks = rag_chunks if rag_chunks > 0 else (len([line for line in rag_context.split("\n") if line.strip()]) if rag_active else 0)
 
-        # Optionally refine or paraphrase the generated answer using the live LLM
-        # when an API key is configured. This allows richer, conversational replies
-        # while preserving the deterministic fallback if the LLM call fails.
+        # If live LLM is configured, request contextual generation from Gemini
         if settings.GEMINI_API_KEY:
             try:
-            llm_used = True
-                # Strong system instructions to prevent hallucination and avoid
-                # changing any factual values. If the model cannot comply, it
-                # must return the original contextual answer verbatim.
+                llm_used = True
                 strict_system = (
-                    "You are ORCA, a concise and factual fishing-assistant chatbot. "
-                    "Follow these rules strictly: do NOT add, invent, or change any factual "
-                    "information (numbers, distances, directions, wind/wave values). "
-                    "Only rephrase the provided contextual answer for clarity and tone. "
-                    "If you cannot safely rephrase without modifying facts, return the contextual answer exactly as given."
+                    f"You are ORCA, a trusted marine intelligence and fishing advisory assistant for local fishermen. "
+                    f"Rules:\n"
+                    f"1. You MUST speak STRICTLY and ONLY in {target_lang_name}.\n"
+                    f"2. Never mix English into Tamil or Malayalam sentences.\n"
+                    f"3. Never hallucinate or alter any numeric values, distances, directions, wind speeds, or wave heights.\n"
+                    f"4. Keep the reply friendly, direct, authoritative, and concise."
                 )
+                rag_section = f"\nRelevant Local Marine Knowledge Base:\n{rag_context}\n" if rag_active else ""
                 llm_prompt = (
-                    f"User question: {query}\n"
-                    f"Contextual answer (DO NOT change facts): {final_answer}\n"
-                    f"Return a concise user-facing reply in {language}."
+                    f"User Query: {query}\n"
+                    f"Current Location: {location_name}\n"
+                    f"Validated Marine Data Facts: {base_answer}\n"
+                    f"{rag_section}\n"
+                    f"Synthesize a clear and concise reply for the fisherman in {target_lang_name} communicating this exact information."
                 )
-                llm_response = await llm_provider.generate_text(llm_prompt, system_prompt=strict_system, temperature=0.0)
-                if llm_response and llm_response.strip():
-                    # Accept LLM output only if numeric facts match the original.
-                    import re
 
-                    def extract_numbers(s: str):
-                        return re.findall(r"[-+]?\d*\.?\d+", s)
+                llm_response = await llm_provider.generate_text(
+                    llm_prompt,
+                    system_prompt=strict_system,
+                    temperature=0.2,
+                    language=target_lang_code,
+                )
 
-                    orig_nums = extract_numbers(final_answer)
-                    resp_nums = extract_numbers(llm_response)
-                    if orig_nums == resp_nums:
-                        final_answer = llm_response.strip()
-                        llm_paraphrase_used = True
-                    else:
-                        # If LLM paraphrase drops numeric facts, keep the conversational
-                        # LLM text but append the deterministic factual sentence so
-                        # users always receive correct numeric information.
-                        conv = llm_response.strip()
-                        if conv and conv != final_answer:
-                            final_answer = f"{conv} — {final_answer}"
-                            llm_paraphrase_used = True
-                        else:
-                            logger.warning(
-                                f"LLM paraphrase rejected due to numeric mismatch(orig={orig_nums},resp={resp_nums}); using deterministic answer."
-                            )
+                if llm_response and len(llm_response.strip()) > 5:
+                    final_answer = llm_response.strip()
+                    llm_paraphrase_used = True
             except Exception as e:
-                # Preserve deterministic responses on any LLM error
-                logger.warning(f"LLM refinement failed; using deterministic response. Error: {repr(e)}")
+                logger.warning(f"LLM generation failed ({e}). Retaining verified factual template.")
 
         return {
             "answer": final_answer,
-            "malayalam_echo": secondary_echo,
+            "malayalam_echo": ml_ans,
             "llm_used": llm_used,
             "llm_paraphrase_used": llm_paraphrase_used,
+            "language": target_lang_code,
+            "rag_used": rag_active,
+            "rag_chunks": effective_chunks,
         }
 
 

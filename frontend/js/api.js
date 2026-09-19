@@ -1,7 +1,7 @@
 /**
  * ORCA Frontend API Client & State Synchronizer
- * Connects UI components to the FastAPI backend.
- * Provides offline persistence via localStorage and Live vs Mock toggle.
+ * Connects UI components to the FastAPI backend with timeout, cancellation,
+ * error normalization, and caching.
  */
 
 class OrcaAPI {
@@ -32,29 +32,59 @@ class OrcaAPI {
   }
 
   async _request(endpoint, options = {}) {
+    const timeoutMs = options.timeout || 15000;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    const reqId = 'req_' + Math.random().toString(36).substring(2, 9);
+    const headers = {
+      'Accept': 'application/json',
+      'X-Request-ID': reqId,
+      ...(options.headers || {})
+    };
+
+    // Only set Content-Type to JSON if body is not FormData
+    if (!(options.body instanceof FormData) && !headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    const fetchOptions = {
+      ...options,
+      headers,
+      signal: options.signal || controller.signal,
+    };
+
     // If offline, check localStorage cache first
     if (!navigator.onLine) {
+      clearTimeout(timeoutId);
       const cached = localStorage.getItem(`orca_cache_${endpoint}`);
       if (cached) {
-        const parsed = JSON.parse(cached);
-        parsed.data_mode = 'cached';
-        parsed.connectivity = 'offline';
-        return parsed;
+        try {
+          const parsed = JSON.parse(cached);
+          parsed.data_mode = 'cached';
+          parsed.connectivity = 'offline';
+          return parsed;
+        } catch (e) {
+          // ignore
+        }
       }
     }
 
     try {
-      const res = await fetch(`${this.apiBase}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          ...(options.headers || {})
-        },
-        ...options
-      });
+      const res = await fetch(`${this.apiBase}${endpoint}`, fetchOptions);
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        let errBody = null;
+        try {
+          errBody = await res.json();
+        } catch (e) {
+          errBody = await res.text();
+        }
+        const error = new Error(`HTTP ${res.status}: ${res.statusText}`);
+        error.status = res.status;
+        error.details = errBody;
+        throw error;
       }
 
       const data = await res.json();
@@ -70,16 +100,55 @@ class OrcaAPI {
       }
       return data;
     } catch (err) {
-      console.warn(`Fetch to ${endpoint} failed, checking local cache:`, err);
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        console.warn(`Request to ${endpoint} timed out after ${timeoutMs}ms.`);
+        err.message = `Request timed out after ${Math.round(timeoutMs / 1000)}s.`;
+      }
+
+      // Fall back to cache if available
       const cached = localStorage.getItem(`orca_cache_${endpoint}`);
       if (cached) {
-        const parsed = JSON.parse(cached);
-        parsed.data_mode = 'cached';
-        parsed.connectivity = 'offline';
-        return parsed;
+        try {
+          const parsed = JSON.parse(cached);
+          parsed.data_mode = 'cached';
+          parsed.is_cached_fallback = true;
+          return parsed;
+        } catch (e) {
+          // ignore
+        }
       }
       throw err;
     }
+  }
+
+  // HTTP Helper methods
+  async get(endpoint) {
+    return this._request(endpoint, { method: 'GET' });
+  }
+
+  async post(endpoint, body) {
+    return this._request(endpoint, {
+      method: 'POST',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    });
+  }
+
+  async put(endpoint, body) {
+    return this._request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+
+  // Runtime Configuration
+  async getConfig() {
+    return this._request('/config');
+  }
+
+  // Health & Diagnostics
+  async getHealthDashboard() {
+    return this._request('/health/dashboard');
   }
 
   // Marine Status
@@ -114,14 +183,11 @@ class OrcaAPI {
   }
 
   async submitRecommendationQuery(queryText, language = 'en', lat, lon) {
-    return this._request('/recommendation/query', {
-      method: 'POST',
-      body: JSON.stringify({
-        query: queryText,
-        language,
-        latitude: lat,
-        longitude: lon,
-      })
+    return this.post('/recommendation/query', {
+      query: queryText,
+      language,
+      latitude: lat,
+      longitude: lon,
     });
   }
 
@@ -134,30 +200,15 @@ class OrcaAPI {
     return this._request(`/alerts/${encodeURIComponent(alertId)}?lat=${lat || ''}&lon=${lon || ''}`);
   }
 
-  // AI Chat & Query
+  // AI Chat & Reasoning
   async sendAIChat(message, language = 'en', lat, lon, conversationId) {
-    return this._request('/ai/chat', {
-      method: 'POST',
-      body: JSON.stringify({
-        message,
-        language,
-        latitude: lat,
-        longitude: lon,
-        conversation_id: conversationId
-      })
-    });
-  }
-
-  async submitQuery(queryText, language = 'en', lat, lon, conversationId = null) {
-    return this._request('/orca/query', {
-      method: 'POST',
-      body: JSON.stringify({
-        query: queryText,
-        language: language,
-        latitude: lat,
-        longitude: lon,
-        conversation_id: conversationId
-      })
+    return this.post('/ai/chat', {
+      message,
+      query: message,
+      language,
+      latitude: lat,
+      longitude: lon,
+      conversation_id: conversationId,
     });
   }
 
@@ -165,72 +216,89 @@ class OrcaAPI {
     return this._request(`/orca/explanation/${encodeURIComponent(queryId)}`);
   }
 
-  // Voice
-  async sendVoiceQuery(queryText, language = 'en', lat, lon) {
-    return this._request('/voice/query', {
-      method: 'POST',
-      body: JSON.stringify({
-        query: queryText,
-        language,
-        latitude: lat,
-        longitude: lon
-      })
+  // Speech-to-Text (Real Groq Whisper Backend API)
+  async transcribeAudio(audioBlob, mimeType = 'audio/webm', language = 'en') {
+    const formData = new FormData();
+    const ext = mimeType.includes('mp4') ? 'mp4' : (mimeType.includes('ogg') ? 'ogg' : (mimeType.includes('wav') ? 'wav' : 'webm'));
+    formData.append('file', audioBlob, `speech.${ext}`);
+    formData.append('language', language);
+
+    return this.post('/voice/transcribe', formData);
+  }
+
+  // Text-to-Speech (Real Fish Audio Backend API)
+  async synthesizeSpeech(text, language = 'en', voiceId = null) {
+    return this.post('/voice/synthesize', {
+      text,
+      language,
+      voice_id: voiceId,
     });
   }
 
-  // Location
+  // Location APIs
   async getLocation() {
     return this._request('/location');
   }
 
   async updateLocation(payload) {
-    return this._request('/location', {
-      method: 'PUT',
-      body: JSON.stringify(payload)
-    });
+    return this.put('/location', payload);
   }
 
   async setGpsLocation(lat, lon, locationName = null) {
-    return this._request('/location/current', {
-      method: 'POST',
-      body: JSON.stringify({ latitude: lat, longitude: lon, location_name: locationName })
+    return this.post('/location/current', {
+      latitude: lat,
+      longitude: lon,
+      location_name: locationName,
     });
   }
 
-  // Profile
+  // Profile APIs
   async getProfile() {
     return this._request('/profile');
   }
 
   async updateProfile(updates) {
-    return this._request('/profile', {
-      method: 'PUT',
-      body: JSON.stringify(updates)
-    });
+    return this.put('/profile', updates);
   }
 
   async uploadProfileImage(avatarUrlOrBase64) {
-    return this._request('/profile/image', {
-      method: 'POST',
-      body: JSON.stringify({ image: avatarUrlOrBase64, avatar_url: avatarUrlOrBase64 })
+    return this.post('/profile/image', {
+      image: avatarUrlOrBase64,
+      avatar_url: avatarUrlOrBase64,
     });
   }
 
-  // Language
+  // Language Preference
   async getLanguage() {
     return this._request('/language');
   }
 
   async updateLanguage(language) {
-    return this._request('/language', {
-      method: 'PUT',
-      body: JSON.stringify({ language })
-    });
+    return this.put('/language', { language });
   }
 
   // Map Data
   async getMapData(lat, lon) {
     return this._request(`/map/data?lat=${lat || ''}&lon=${lon || ''}`);
+  }
+
+  // Refresh
+  async refreshData(lat, lon) {
+    const qLat = lat !== undefined ? `?lat=${lat}&lon=${lon}` : '';
+    return this.post(`/refresh${qLat}`, {});
+  }
+
+  // RAG / Local Intelligence
+  async getRagStatus() {
+    return this._request('/rag/status');
+  }
+
+  async searchRag(query, language = 'en', topK = 5) {
+    return this.post('/rag/search', {
+      query,
+      language,
+      top_k: topK,
+    });
   }
 }
 

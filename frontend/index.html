@@ -44,11 +44,11 @@
       100% { transform: translateX(0); }
     }
     @keyframes orcaSwimCycle {
-      0% { transform: translateX(0vw) scaleX(1); left: -24%; }
-      48% { transform: translateX(130vw) scaleX(1); left: 0%; }
-      49% { transform: translateX(130vw) scaleX(-1); left: 0%; }
-      98% { transform: translateX(0vw) scaleX(-1); left: -24%; }
-      100% { transform: translateX(0vw) scaleX(1); left: -24%; }
+      0%   { transform: translateX(0vw)   scaleX(-1); left: -24%; }
+      48%  { transform: translateX(130vw) scaleX(-1); left: 0%; }
+      49%  { transform: translateX(130vw) scaleX(1);  left: 0%; }
+      98%  { transform: translateX(0vw)   scaleX(1);  left: -24%; }
+      100% { transform: translateX(0vw)   scaleX(-1); left: -24%; }
     }
     @keyframes orcaSharkBob {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -75,6 +75,26 @@
     }
   </style>
   <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Maps JavaScript API loader (loaded asynchronously with key from backend) -->
+    <script>
+      // Load Google Maps JS API dynamically using the browser key from /api/config
+      async function loadGoogleMaps() {
+        try {
+          const resp = await fetch('/api/config');
+          const cfg = await resp.json();
+          const key = cfg.GOOGLE_MAPS_BROWSER_KEY;
+          if (!key) return; // fallback will be handled in marine_map.js
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&callback=initGoogleMap`;
+          script.async = true;
+          script.defer = true;
+          document.head.appendChild(script);
+        } catch (e) {
+          console.warn('Failed to load Google Maps key', e);
+        }
+      }
+      loadGoogleMaps();
+    </script>
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -953,44 +973,63 @@
   </div>
 
   <!-- ============================================== -->
-  <!-- FIXED BOTTOM NAVIGATION (5-COLUMN GRID)        -->
-  <!-- ============================================== -->
-  <nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface/95 backdrop-blur-xl shadow-[0_-2px_10px_rgba(0,0,0,0.06)] border-t border-surface-container/60">
-    <div class="grid grid-cols-5 items-end h-[68px] px-2 max-w-lg mx-auto relative pb-1">
-      
-      <!-- 1. Home Tab -->
-      <a class="flex flex-col items-center justify-center h-full pb-1 text-center min-w-0 transition-colors text-primary-container font-bold" data-path="home" href="#home">
-        <span class="material-symbols-outlined text-[22px]">anchor</span>
-        <span class="text-[10px] font-medium leading-tight truncate max-w-full px-0.5 mt-0.5" data-i18n="nav.home">Home</span>
-      </a>
-
-      <!-- 2. Map Tab -->
-      <a class="flex flex-col items-center justify-center h-full pb-1 text-center min-w-0 text-on-surface-variant hover:text-primary-container transition-colors" data-path="coastal-map" href="#coastal-map">
-        <span class="material-symbols-outlined text-[22px]">explore</span>
-        <span class="text-[10px] font-medium leading-tight truncate max-w-full px-0.5 mt-0.5" data-i18n="nav.map">Map</span>
-      </a>
-
-      <!-- 3. Ask ORCA Central Elevated Action (NO OVERLAP) -->
-      <div class="flex flex-col items-center justify-start h-full relative -top-3 z-10 min-w-0">
-        <a aria-label="Ask ORCA Voice Assistant" class="w-[50px] h-[50px] rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-lg hover:bg-secondary active:scale-95 transition-all ring-4 ring-surface" data-path="ask-orca" href="#ask-orca">
-          <span class="material-symbols-outlined text-[26px]">mic</span>
+  
+    <!-- Developer Diagnostics Modal (hidden by default) -->
+    <div id="health-dashboard-modal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-surface-container-low w-full max-w-2xl rounded-xl p-6 overflow-auto max-h-[80vh]">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold" data-i18n="health.title">System Health Dashboard</h2>
+          <button class="text-on-surface-variant hover:text-primary-container" onclick="document.getElementById('health-dashboard-modal').classList.add('hidden')"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <pre id="health-dashboard-content" class="text-sm whitespace-pre-wrap"></pre>
+      </div>
+    </div>
+    <!-- Health dashboard button removed per user request -->
+    <script>
+      async function fetchHealthDashboard() {
+        try {
+          const resp = await fetch('/api/health/dashboard');
+          const data = await resp.json();
+          document.getElementById('health-dashboard-content').textContent = JSON.stringify(data, null, 2);
+          document.getElementById('health-dashboard-modal').classList.remove('hidden');
+        } catch (e) {
+          alert('Failed to load health dashboard');
+        }
+      }
+    </script>
+    <nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface/95 backdrop-blur-xl shadow-[0_-2px_10px_rgba(0,0,0,0.06)] border-t border-surface-container/60">
+      <div class="grid grid-cols-5 items-end h-[68px] px-2 max-w-lg mx-auto relative pb-1">
+        <!-- 1. Home Tab -->
+        <a id="nav-home" class="flex flex-col items-center justify-center h-full pb-1 text-center min-w-0 transition-colors text-primary-container font-bold" data-path="home" href="#home">
+          <span class="material-symbols-outlined text-[22px]">anchor</span>
+          <span class="text-[10px] font-medium leading-tight truncate max-w-full px-0.5 mt-0.5" data-i18n="nav.home">Home</span>
+        </a>
+        <!-- 2. Map Tab -->
+        <a id="nav-map" class="flex flex-col items-center justify-center h-full pb-1 text-center min-w-0 text-on-surface-variant hover:text-primary-container transition-colors" data-path="coastal-map" href="#coastal-map">
+          <span class="material-symbols-outlined text-[22px]">explore</span>
+          <span class="text-[10px] font-medium leading-tight truncate max-w-full px-0.5 mt-0.5" data-i18n="nav.map">Map</span>
+        </a>
+        <!-- 3. Ask ORCA Central Elevated Action (NO OVERLAP) -->
+        <div id="nav-mic" class="flex flex-col items-center justify-start h-full relative -top-3 z-10 min-w-0">
+          <a aria-label="Ask ORCA Voice Assistant" class="w-[50px] h-[50px] rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-lg hover:bg-secondary active:scale-95 transition-all ring-4 ring-surface" data-path="ask-orca" href="#ask-orca">
+            <span class="material-symbols-outlined text-[26px]">mic</span>
+          </a>
+        </div>
+        <!-- 4. Alerts Tab -->
+        <a class="flex flex-col items-center justify-center h-full pb-1 text-center min-w-0 text-on-surface-variant hover:text-primary-container transition-colors" data-path="hazard-alerts" href="#hazard-alerts">
+          <span class="material-symbols-outlined text-[22px]">warning</span>
+          <span class="text-[10px] font-medium leading-tight truncate max-w-full px-0.5 mt-0.5" data-i18n="nav.alerts">Alerts</span>
+        </a>
+        <!-- 5. Profile Tab -->
+        <a class="flex flex-col items-center justify-center h-full pb-1 text-center min-w-0 text-on-surface-variant hover:text-primary-container transition-colors" data-path="fisherman-profile" href="#fisherman-profile">
+          <span class="material-symbols-outlined text-[22px]">manage_accounts</span>
+          <span class="text-[10px] font-medium leading-tight truncate max-w-full px-0.5 mt-0.5" data-i18n="nav.profile">Profile</span>
         </a>
       </div>
-
-      <!-- 4. Alerts Tab -->
-      <a class="flex flex-col items-center justify-center h-full pb-1 text-center min-w-0 text-on-surface-variant hover:text-primary-container transition-colors" data-path="hazard-alerts" href="#hazard-alerts">
-        <span class="material-symbols-outlined text-[22px]">warning</span>
-        <span class="text-[10px] font-medium leading-tight truncate max-w-full px-0.5 mt-0.5" data-i18n="nav.alerts">Alerts</span>
-      </a>
-
-      <!-- 5. Profile Tab -->
-      <a class="flex flex-col items-center justify-center h-full pb-1 text-center min-w-0 text-on-surface-variant hover:text-primary-container transition-colors" data-path="fisherman-profile" href="#fisherman-profile">
-        <span class="material-symbols-outlined text-[22px]">manage_accounts</span>
-        <span class="text-[10px] font-medium leading-tight truncate max-w-full px-0.5 mt-0.5" data-i18n="nav.profile">Profile</span>
-      </a>
-
-    </div>
-  </nav>
+    </nav>
+    
+  <!-- ============================================== -->
+  
 
   <!-- Client Scripts -->
   <script src="js/api.js"></script>

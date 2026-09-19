@@ -69,7 +69,18 @@ class OrcaOrchestrator:
         elif weather_out.status == SafetyStatus.CAUTION and final_safety_status != SafetyStatus.DANGER:
             final_safety_status = SafetyStatus.CAUTION
 
+        # 4b. RAG Knowledge Retrieval (local, fast, multilingual)
+        rag_context = ""
+        if getattr(settings, "RAG_ENABLED", True):
+            try:
+                from backend.app.rag.pipeline import rag_pipeline
+                rag_context = await rag_pipeline.query(req.query, lang=lang)
+            except Exception as rag_err:
+                logger.warning(f"RAG query retrieval failed: {rag_err}")
+
         # 5. Generate Tailored, Intent-Specific Response Text
+        from backend.app.api.routes.location import _ACTIVE_LOCATION
+        loc_name = getattr(_ACTIVE_LOCATION, "location_name", settings.DEFAULT_LOCATION_NAME)
         resp = await response_agent.generate_response(
             query=req.query,
             extracted=extracted,
@@ -79,6 +90,8 @@ class OrcaOrchestrator:
             best_zone=zone_out.best_zone.model_dump(),
             alerts=alerts,
             language=lang,
+            location_name=loc_name,
+            rag_context=rag_context,
         )
 
         elapsed_ms = int((time.time() - start_time) * 1000)
@@ -97,6 +110,8 @@ class OrcaOrchestrator:
             "response": resp,
             "elapsed_ms": elapsed_ms,
             "timestamp": datetime.now(timezone.utc),
+            "rag_used": resp.get("rag_used", False),
+            "rag_chunks": resp.get("rag_chunks", 0),
         }
 
         data_mode = DataMode.DEMO if settings.DEMO_MODE else DataMode.LIVE
@@ -127,6 +142,8 @@ class OrcaOrchestrator:
             data_mode=data_mode,
             llm_used=resp.get("llm_used", False),
             llm_paraphrase_used=resp.get("llm_paraphrase_used", False),
+            rag_used=resp.get("rag_used", False),
+            rag_chunks=resp.get("rag_chunks", 0),
         )
 
     async def get_explanation(self, query_id: str) -> OrcaExplanationResponse:

@@ -187,29 +187,51 @@ async def get_alert_by_id(
 # ── AI CHAT & VOICE ──────────────────────────────────────────────────────────
 @router.post("/ai/chat", summary="AI Chat interaction with multi-agent orchestration")
 async def ai_chat(payload: AIChatRequest):
+    import time
+    start_time = time.time()
     query_text = payload.query or payload.message or payload.prompt or "Is it safe to fish today?"
     active_lat = payload.latitude if payload.latitude is not None else _ACTIVE_LOCATION.latitude
     active_lon = payload.longitude if payload.longitude is not None else _ACTIVE_LOCATION.longitude
+    conv_id = payload.conversation_id or f"conv_{int(time.time())}"
 
     req = OrcaQueryRequest(
         query=query_text,
         language=payload.language or "en",
         latitude=active_lat,
         longitude=active_lon,
-        conversation_id=payload.conversation_id,
+        conversation_id=conv_id,
     )
     res = await orchestrator.process_query(req)
+    latency_ms = int((time.time() - start_time) * 1000)
+
+    safety_str = res.status.value if hasattr(res.status, "value") else str(res.status)
+
     return {
-        "response": res.answer,
+        "success": True,
         "query_id": res.query_id,
-        "safety_status": res.status.value if hasattr(res.status, "value") else str(res.status),
+        "conversation_id": conv_id,
         "language": res.language,
+        "response": res.answer,
         "intent": res.intent,
-        "best_zone": res.recommended_zone.model_dump() if res.recommended_zone else None,
+        "location": {
+            "name": _ACTIVE_LOCATION.location_name,
+            "harbor": _ACTIVE_LOCATION.harbor,
+            "latitude": active_lat,
+            "longitude": active_lon,
+        },
         "weather": res.weather,
         "ocean": res.ocean,
+        "best_zone": res.recommended_zone.model_dump() if res.recommended_zone else None,
+        "safety_status": safety_str,
+        "sources": ["IMD Radar", "INCOIS PFZ", "ISRO Oceansat-3", "Gemini AI", "Local Marine RAG"],
+        "data_mode": "demo" if settings.DEMO_MODE else "live",
         "llm_used": getattr(res, "llm_used", False),
         "llm_paraphrase_used": getattr(res, "llm_paraphrase_used", False),
+        "rag_used": getattr(res, "rag_used", False),
+        "rag_chunks": getattr(res, "rag_chunks", 0),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "latency_ms": latency_ms,
+        "error": None,
     }
 
 
@@ -258,7 +280,7 @@ async def get_map_data(
     best_zone = zones[0] if zones else {
         "id": "A12",
         "code": "Zone A-12",
-        "name": "Kollam Offshore Deep Basin",
+        "name": f"{_ACTIVE_LOCATION.location_name} Offshore Deep Basin",
         "latitude": active_lat - 0.08,
         "longitude": active_lon - 0.12,
         "distance_km": 12.0,
@@ -328,7 +350,7 @@ async def get_map_data(
         "recommended_zone": best_zone,
         "zones": zones,
         "navigation_route": {
-            "start": {"lat": active_lat, "lon": active_lon, "label": "Neendakara Harbor"},
+            "start": {"lat": active_lat, "lon": active_lon, "label": _ACTIVE_LOCATION.harbor},
             "destination": {
                 "lat": best_zone.get("latitude", active_lat - 0.08),
                 "lon": best_zone.get("longitude", active_lon - 0.12),
@@ -340,11 +362,13 @@ async def get_map_data(
         },
         "isobaths": isobaths,
         "navigation_aids": [
-            {"id": "nav_01", "name": "Kollam Lighthouse", "type": "lighthouse", "latitude": active_lat + 0.015, "longitude": active_lon + 0.005},
-            {"id": "nav_02", "name": "Neendakara Breakwater Light", "type": "harbor_light", "latitude": active_lat + 0.055, "longitude": active_lon - 0.01},
+            {"id": "nav_01", "name": f"{_ACTIVE_LOCATION.location_name} Lighthouse", "type": "lighthouse", "latitude": active_lat + 0.015, "longitude": active_lon + 0.005},
+            {"id": "nav_02", "name": f"{_ACTIVE_LOCATION.harbor} Breakwater Light", "type": "harbor_light", "latitude": active_lat + 0.055, "longitude": active_lon - 0.01},
             {"id": "nav_03", "name": "PFZ Buoy C-09", "type": "buoy", "latitude": active_lat - 0.04, "longitude": active_lon - 0.07},
             {"id": "nav_04", "name": "Offshore Reef Marker B-04", "type": "buoy", "latitude": active_lat - 0.10, "longitude": active_lon - 0.14},
         ],
+        "data_mode": "demo" if settings.DEMO_MODE else "live",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc),
     }
 
@@ -405,5 +429,32 @@ async def refresh_data(
         "weather_status": w.get("status"),
         "ocean_condition": o.get("condition"),
         "zones_count": len(z),
+    }
+
+
+# ── RAG / LOCAL INTELLIGENCE ─────────────────────────────────────────────────
+class RagSearchRequest(BaseModel):
+    query: str
+    language: Optional[str] = "en"
+    top_k: Optional[int] = 5
+
+
+@router.get("/rag/status", summary="Get RAG and vector store status")
+async def rag_status():
+    from backend.app.rag.pipeline import rag_pipeline
+    return rag_pipeline.status()
+
+
+@router.post("/rag/search", summary="Perform raw local RAG semantic search and rerank")
+async def rag_search(payload: RagSearchRequest):
+    from backend.app.rag.pipeline import rag_pipeline, format_context
+    hits = rag_pipeline.search_raw(payload.query, lang=payload.language or "en", top_k=payload.top_k or 5)
+    context = format_context(hits, payload.language or "en")
+    return {
+        "query": payload.query,
+        "language": payload.language,
+        "count": len(hits),
+        "hits": hits,
+        "context": context,
     }
 

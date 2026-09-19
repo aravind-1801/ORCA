@@ -36,6 +36,16 @@ class INCOISAdapter(BaseMarineSourceAdapter):
 
     async def fetch_zones(self, lat: float, lon: float) -> List[Dict[str, Any]]:
         if settings.DEMO_MODE:
+            d_lat = lat - 8.88
+            d_lon = lon - 76.59
+            if abs(d_lat) > 0.01 or abs(d_lon) > 0.01:
+                shifted = []
+                for z in DEMO_ZONES:
+                    nz = dict(z)
+                    nz["latitude"] = round(z["latitude"] + d_lat, 4)
+                    nz["longitude"] = round(z["longitude"] + d_lon, 4)
+                    shifted.append(nz)
+                return shifted
             return DEMO_ZONES
 
         try:

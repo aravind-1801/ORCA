@@ -24,6 +24,11 @@ async def lifespan(app: FastAPI):
         await init_db()
     except Exception as e:
         logger.warning(f"Database table initialization notice: {e}")
+    try:
+        from backend.app.rag.startup import init_rag
+        init_rag()
+    except Exception as rag_err:
+        logger.warning(f"RAG startup notice: {rag_err}")
     logger.info(f"ORCA Backend started successfully in {settings.APP_ENV} mode (Demo={settings.DEMO_MODE}).")
     yield
     # Shutdown
@@ -87,6 +92,9 @@ async def request_context_middleware(request: Request, call_next):
 from backend.app.api.routes.location import router as location_router
 from backend.app.api.routes.standard_api import router as standard_router
 
+# Direct root health endpoint (/health)
+app.include_router(health_router)
+
 # Register API routers under both /api and /api/v1 for complete compatibility
 for prefix in ["/api", "/api/v1"]:
     app.include_router(health_router, prefix=prefix)
@@ -104,7 +112,7 @@ for prefix in ["/api", "/api/v1"]:
 async def get_frontend_config():
     """Returns non-sensitive configuration for the frontend, including the Google Maps API key."""
     return {
-        "google_maps_key": settings.GOOGLE_MAPS_KEY or "",
+        "google_maps_key": settings.get_effective_maps_key(),
         "demo_mode": settings.DEMO_MODE,
         "default_lat": settings.DEFAULT_LATITUDE,
         "default_lon": settings.DEFAULT_LONGITUDE,
@@ -112,10 +120,19 @@ async def get_frontend_config():
         "default_harbor": settings.DEFAULT_HARBOR,
     }
 
-# Mount frontend static directory if exists
-frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../frontend"))
+# Resolve frontend directory
+frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend"))
 if not os.path.isdir(frontend_dir):
-    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend"))
+    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../frontend"))
+
+from fastapi.responses import FileResponse
+
+@app.get("/", include_in_schema=False)
+async def serve_index():
+    index_path = os.path.join(frontend_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return JSONResponse({"status": "ok", "app": settings.APP_NAME})
 
 if os.path.isdir(frontend_dir):
     app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")

@@ -1,216 +1,237 @@
 /**
  * ORCA Speech & Voice Interface (Clean State Machine)
- * States: IDLE | LISTENING | PROCESSING | RESPONDING | ERROR
- * Synchronized with global application language (en-IN, ml-IN, ta-IN).
- * Prevents stuck mic, race conditions, and handles audio cancellation on screen switch.
+ * States: IDLE | LISTENING | TRANSCRIBING | THINKING | SPEAKING | ERROR
+ * 
+ * Pipeline:
+ *  Microphone -> MediaRecorder -> POST /api/voice/transcribe (Groq Whisper)
+ *  -> AI Reasoner -> POST /api/voice/synthesize (Fish Audio MP3) -> HTMLAudioElement Playback
+ *  -> Seamless browser SpeechSynthesis fallback if offline or Fish Audio fails.
  */
 
 class OrcaVoiceManager {
   constructor() {
-    this.state = 'IDLE'; // 'IDLE' | 'LISTENING' | 'PROCESSING' | 'RESPONDING' | 'ERROR'
-    this.recognition = null;
+    this.state = 'IDLE'; // 'IDLE' | 'LISTENING' | 'TRANSCRIBING' | 'THINKING' | 'SPEAKING' | 'ERROR'
+    this.mediaRecorder = null;
+    this.audioChunks = [];
+    this.audioStream = null;
+    this.currentAudioElement = null;
     this.synthesis = window.speechSynthesis || null;
-    this.currentLanguage = 'ml-IN';
-    this.isListening = false;
-    this.hasPermission = false;
-    this.lastTranscript = '';
-    this.initRecognition();
+    this.currentLanguage = 'en'; // 'en' | 'ta' | 'ml'
+    this.supportedMimeType = this.detectSupportedMimeType();
+  }
+
+  detectSupportedMimeType() {
+    if (typeof MediaRecorder === 'undefined') return 'audio/webm';
+    const candidates = [
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+      'audio/mp4',
+      'audio/wav',
+    ];
+    for (const c of candidates) {
+      if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)) {
+        return c;
+      }
+    }
+    return 'audio/webm';
   }
 
   setLanguage(langCode) {
     if (!langCode) return;
     const l = langCode.toLowerCase();
     if (l.startsWith('ta')) {
-      this.currentLanguage = 'ta-IN';
-    } else if (l.startsWith('en')) {
-      this.currentLanguage = 'en-IN';
+      this.currentLanguage = 'ta';
+    } else if (l.startsWith('ml')) {
+      this.currentLanguage = 'ml';
     } else {
-      this.currentLanguage = 'ml-IN';
+      this.currentLanguage = 'en';
     }
 
-    if (this.recognition) {
-      this.recognition.lang = this.currentLanguage;
-    }
-
-    // If currently speaking, cancel TTS on language switch
-    if (this.synthesis && this.state === 'RESPONDING') {
-      this.synthesis.cancel();
+    // Stop speaking if language switched
+    if (this.state === 'SPEAKING') {
+      this.stopPlayback();
       this.transitionTo('IDLE');
     }
   }
 
-  initRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      try {
-        this.recognition = new SpeechRecognition();
-        this.recognition.continuous = false;
-        this.recognition.interimResults = false;
-        this.recognition.maxAlternatives = 1;
-        this.recognition.lang = this.currentLanguage;
-
-        this.recognition.onstart = () => {
-          this.isListening = true;
-          this.hasPermission = true;
-          this.transitionTo('LISTENING');
-        };
-
-        this.recognition.onresult = (event) => {
-          if (!event.results || !event.results[0] || !event.results[0][0]) return;
-          const transcript = event.results[0][0].transcript.trim();
-          this.lastTranscript = transcript;
-          this.isListening = false;
-          this.transitionTo('PROCESSING', transcript);
-        };
-
-        this.recognition.onerror = (event) => {
-          console.warn('Speech recognition event notice:', event.error);
-          this.isListening = false;
-          if (event.error === 'not-allowed') {
-            this.hasPermission = false;
-            this.transitionTo('ERROR', 'Microphone permission denied.');
-          } else if (event.error === 'no-speech') {
-            this.transitionTo('IDLE');
-          } else {
-            this.transitionTo('ERROR', event.error);
-          }
-        };
-
-        this.recognition.onend = () => {
-          this.isListening = false;
-          if (this.state === 'LISTENING') {
-            this.transitionTo('IDLE');
-          }
-        };
-      } catch (err) {
-        console.warn('SpeechRecognition initialization notice:', err);
-        this.recognition = null;
-      }
-    }
-  }
-
-  async requestMicPermission() {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop());
-        this.hasPermission = true;
-        return true;
-      } catch (e) {
-        this.hasPermission = false;
-        return false;
-      }
-    }
-    return true;
-  }
-
   async startListening() {
-    // If already listening, stop
     if (this.state === 'LISTENING') {
       this.stopListening();
       return;
     }
 
-    // Cancel any active TTS speech
-    if (this.synthesis) {
-      this.synthesis.cancel();
-    }
+    // Stop any active audio
+    this.stopPlayback();
 
-    // Check permission
-    const granted = await this.requestMicPermission();
-    if (!granted && !this.recognition) {
-      this.transitionTo('ERROR', 'Microphone access is required for voice input.');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      this.transitionTo('ERROR', 'Microphone access is not supported in this browser.');
       return;
     }
 
-    if (this.recognition) {
-      try {
-        this.recognition.lang = this.currentLanguage;
-        this.recognition.start();
-      } catch (e) {
-        console.warn('Recognition start exception, resetting:', e);
-        try {
-          this.recognition.abort();
-          this.recognition.start();
-        } catch (retryErr) {
-          // Fallback simulation for unsupported browsers/environments
-          this._simulateVoiceCapture();
-        }
-      }
-    } else {
-      this._simulateVoiceCapture();
-    }
-  }
+    try {
+      this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.audioChunks = [];
 
-  _simulateVoiceCapture() {
-    this.isListening = true;
-    this.transitionTo('LISTENING');
-    setTimeout(() => {
-      if (this.state === 'LISTENING') {
-        const sample = this.currentLanguage.startsWith('ml')
-          ? 'ഇന്ന് മീൻപിടിക്കാൻ പോകാമോ?'
-          : (this.currentLanguage.startsWith('ta') ? 'இன்று கடலுக்கு செல்லலாமா?' : 'Is it safe to go fishing today?');
-        this.isListening = false;
-        this.transitionTo('PROCESSING', sample);
-      }
-    }, 2500);
+      this.mediaRecorder = new MediaRecorder(this.audioStream, {
+        mimeType: this.supportedMimeType,
+      });
+
+      this.mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          this.audioChunks.push(event.data);
+        }
+      };
+
+      this.mediaRecorder.onstop = async () => {
+        this.cleanupStream();
+        if (this.audioChunks.length === 0) {
+          this.transitionTo('IDLE');
+          return;
+        }
+
+        const audioBlob = new Blob(this.audioChunks, { type: this.supportedMimeType });
+        this.audioChunks = [];
+
+        // Begin Transcription
+        this.transitionTo('TRANSCRIBING');
+        try {
+          const res = await window.orcaApi.transcribeAudio(audioBlob, this.supportedMimeType, this.currentLanguage);
+          if (res && res.success && res.text && res.text.trim()) {
+            this.transitionTo('THINKING', res.text.trim());
+          } else {
+            console.warn('Groq STT returned no text or error:', res ? res.error : 'empty');
+            // Check browser recognition as fallback if present
+            this.transitionTo('ERROR', res && res.error ? res.error.message : 'No speech recognized. Please try again.');
+          }
+        } catch (err) {
+          console.error('STT API failure:', err);
+          this.transitionTo('ERROR', 'Voice transcription service unavailable.');
+        }
+      };
+
+      this.mediaRecorder.start();
+      this.transitionTo('LISTENING');
+    } catch (err) {
+      console.error('Microphone permission or start error:', err);
+      this.cleanupStream();
+      this.transitionTo('ERROR', 'Microphone permission denied or device not found.');
+    }
   }
 
   stopListening() {
-    this.isListening = false;
-    if (this.recognition) {
+    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
       try {
-        this.recognition.stop();
+        this.mediaRecorder.stop();
       } catch (e) {
-        // ignore
+        console.warn('MediaRecorder stop error:', e);
       }
-    }
-    if (this.state === 'LISTENING') {
-      this.transitionTo('IDLE');
     }
   }
 
-  cancel() {
-    this.isListening = false;
-    if (this.recognition) {
+  cleanupStream() {
+    if (this.audioStream) {
       try {
-        this.recognition.abort();
+        this.audioStream.getTracks().forEach(track => track.stop());
       } catch (e) {
         // ignore
       }
+      this.audioStream = null;
     }
-    if (this.synthesis) {
+  }
+
+  stopPlayback() {
+    if (this.currentAudioElement) {
+      try {
+        this.currentAudioElement.pause();
+        this.currentAudioElement.currentTime = 0;
+      } catch (e) {
+        // ignore
+      }
+      this.currentAudioElement = null;
+    }
+
+    if (this.synthesis && this.synthesis.speaking) {
       try {
         this.synthesis.cancel();
       } catch (e) {
         // ignore
       }
     }
+  }
+
+  cancel() {
+    this.stopListening();
+    this.cleanupStream();
+    this.stopPlayback();
     this.transitionTo('IDLE');
   }
 
-  speak(text, lang = null) {
-    if (!this.synthesis || !text) return;
-    this.synthesis.cancel();
+  async speak(text, lang = null) {
+    if (!text || !text.trim()) return;
+    this.stopPlayback();
 
     const targetLang = lang || this.currentLanguage;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = targetLang;
-    utterance.rate = 0.92;
-    utterance.pitch = 1.0;
+    this.transitionTo('SPEAKING');
 
-    this.transitionTo('RESPONDING');
+    // 1. PRIMARY: Fish Audio Backend TTS
+    try {
+      if (window.orcaApi) {
+        const ttsRes = await window.orcaApi.synthesizeSpeech(text, targetLang);
+        if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
+          const audioFormat = ttsRes.audio_format || 'mp3';
+          const audio = new Audio(`data:audio/${audioFormat};base64,${ttsRes.audio_base64}`);
+          this.currentAudioElement = audio;
 
-    utterance.onend = () => {
+          audio.onended = () => {
+            this.currentAudioElement = null;
+            this.transitionTo('IDLE');
+          };
+
+          audio.onerror = (e) => {
+            console.warn('Audio playback error, falling back to browser SpeechSynthesis:', e);
+            this.fallbackBrowserSpeak(text, targetLang);
+          };
+
+          await audio.play();
+          return;
+        }
+      }
+    } catch (ttsErr) {
+      console.warn('Fish Audio synthesis failed, trying browser TTS fallback:', ttsErr);
+    }
+
+    // 2. FALLBACK: Browser SpeechSynthesis
+    this.fallbackBrowserSpeak(text, targetLang);
+  }
+
+  fallbackBrowserSpeak(text, lang) {
+    if (!this.synthesis) {
       this.transitionTo('IDLE');
-    };
+      return;
+    }
 
-    utterance.onerror = (e) => {
-      console.warn('TTS playback notice:', e);
+    try {
+      this.synthesis.cancel();
+      const locale = lang.startsWith('ta') ? 'ta-IN' : (lang.startsWith('ml') ? 'ml-IN' : 'en-IN');
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = locale;
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+
+      utterance.onend = () => {
+        this.transitionTo('IDLE');
+      };
+
+      utterance.onerror = () => {
+        this.transitionTo('IDLE');
+      };
+
+      this.synthesis.speak(utterance);
+    } catch (e) {
+      console.warn('Browser SpeechSynthesis failed:', e);
       this.transitionTo('IDLE');
-    };
-
-    this.synthesis.speak(utterance);
+    }
   }
 
   transitionTo(newState, payload = null) {

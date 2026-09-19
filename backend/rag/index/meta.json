@@ -1,0 +1,746 @@
+{
+  "dim": 843,
+  "docs": [
+    {
+      "doc_id": "safety_001",
+      "category": "safety",
+      "tags": [
+        "life jacket",
+        "safety gear",
+        "mandatory"
+      ],
+      "text": "Every fisherman must wear a life jacket before venturing into the sea. Indian Coast Guard regulations mandate life jackets on all fishing vessels under 20 meters.",
+      "text_ta": "கடலுக்கு செல்வதற்கு முன் ஒவ்வொரு மீனவரும் உயிர் காக்கும் ஜாக்கெட் அணிய வேண்டும். 20 மீட்டருக்கும் குறைவான அனைத்து மீன்பிடி படகுகளிலும் உயிர் காக்கும் ஜாக்கெட் கட்டாயமாக்கப்பட்டுள்ளது.",
+      "text_ml": "കടലിൽ പോകുന്നതിനു മുൻപ് എല്ലാ മത്സ്യത്തൊഴിലാളിയും ലൈഫ് ജാക്കറ്റ് ധരിക്കണം. 20 മീറ്ററിൽ കുറവുള്ള എല്ലാ മത്സ്യബന്ധന യാനങ്ങളിലും ലൈഫ് ജാക്കറ്റ് നിർബന്ധമാണ്."
+    },
+    {
+      "doc_id": "safety_002",
+      "category": "safety",
+      "tags": [
+        "VHF",
+        "radio",
+        "distress",
+        "channel 16"
+      ],
+      "text": "VHF Channel 16 (156.800 MHz) is the international maritime distress and calling frequency. Always monitor this channel while at sea. For emergencies call Indian Coast Guard on 1554.",
+      "text_ta": "VHF சேனல் 16 (156.800 MHz) சர்வதேச கடல் ஆபத்து மற்றும் தொடர்பு அலைவரிசை ஆகும். கடலில் இருக்கும் போது எப்போதும் இந்த சேனலை கவனிக்கவும். அவசர நிலையில் இந்திய கடலோர காவல் படையை 1554 என்ற எண்ணில் அழைக்கவும்.",
+      "text_ml": "VHF ചാനൽ 16 (156.800 MHz) അന്താരാഷ്ട്ര സമുദ്ര ആപദ് ആശയവിനിമയ ആവൃത്തിയാണ്. കടലിലായിരിക്കുമ്പോൾ ഇത് എപ്പോഴും ശ്രദ്ധിക്കുക. അടിയന്തര ഘട്ടത്തിൽ ഇന്ത്യൻ തീരസേനയെ 1554 ൽ വിളിക്കുക."
+    },
+    {
+      "doc_id": "safety_003",
+      "category": "safety",
+      "tags": [
+        "monsoon",
+        "june",
+        "july",
+        "ban",
+        "seasonal closure"
+      ],
+      "text": "Trawl fishing is banned along the Kerala and Tamil Nadu coasts during the monsoon season from June 9 to July 31 each year to protect fish breeding. Traditional fishing crafts may operate with caution.",
+      "text_ta": "கேரள மற்றும் தமிழ்நாடு கடற்கரையோரம் ஒவ்வொரு ஆண்டும் ஜூன் 9 முதல் ஜூலை 31 வரை பருவமழை காலத்தில் மீன் இனப்பெருக்கத்தை பாதுகாக்க இழுவை மீன்பிடி தடை செய்யப்படுகிறது.",
+      "text_ml": "മത്സ്യ പ്രജനനം സംരക്ഷിക്കാൻ ജൂൺ 9 മുതൽ ജൂലൈ 31 വരെ കേരള-തമിഴ്‌നാട് തീരത്ത് ട്രോൾ മത്സ്യബന്ധനം നിരോധിക്കപ്പെട്ടിരിക്കുന്നു. പരമ്പരാഗത ബോട്ടുകൾ ജാഗ്രതയോടെ പ്രവർത്തിക്കാം."
+    },
+    {
+      "doc_id": "safety_004",
+      "category": "safety",
+      "tags": [
+        "cyclone",
+        "storm",
+        "warning",
+        "harbor"
+      ],
+      "text": "When a cyclone warning (Signal 3 or above) is issued by IMD, all fishing vessels must return to harbor immediately. Do not venture out during Cyclone Watch or Cyclone Warning periods.",
+      "text_ta": "IMD சூறாவளி எச்சரிக்கை (சிக்னல் 3 அல்லது அதற்கு மேல்) வெளியிடும் போது, அனைத்து மீன்பிடி படகுகளும் உடனடியாக துறைமுகம் திரும்ப வேண்டும்.",
+      "text_ml": "IMD ഒരു ചുഴലിക്കാറ്റ് മുന്നറിയിപ്പ് (സിഗ്നൽ 3 അല്ലെങ്കിൽ അതിൽ കൂടുതൽ) നൽകുമ്പോൾ, എല്ലാ മത്സ്യബന്ധന യാനങ്ങളും ഉടൻ തുറമുഖത്തേക്ക് മടങ്ങണം."
+    },
+    {
+      "doc_id": "safety_005",
+      "category": "safety",
+      "tags": [
+        "night fishing",
+        "lights",
+        "navigation lights"
+      ],
+      "text": "All fishing vessels operating at night must display proper navigation lights: white masthead light, green starboard light, and red port light. Night fishing above wave height 1.5m is not recommended.",
+      "text_ta": "இரவு நேர மீன்பிடிக்கு செல்லும் அனைத்து படகுகளும் சரியான வழிசெலுத்தல் விளக்குகளை காட்ட வேண்டும். அலை உயரம் 1.5 மீட்டருக்கு மேல் இருக்கும்போது இரவு மீன்பிடி பரிந்துரைக்கப்படவில்லை.",
+      "text_ml": "രാത്രി മത്സ്യബന്ധനം നടത്തുന്ന എല്ലാ യാനങ്ങളും ശരിയായ നാവിഗേഷൻ ലൈറ്റുകൾ പ്രദർശിപ്പിക്കണം. 1.5 മീറ്ററിൽ കൂടുതൽ തിരമാലയുള്ളപ്പോൾ രാത്രി മത്സ്യബന്ധനം ശുപാർശ ചെയ്യുന്നില്ല."
+    },
+    {
+      "doc_id": "safety_006",
+      "category": "safety",
+      "tags": [
+        "wave height",
+        "safe limit",
+        "beaufort"
+      ],
+      "text": "Safe sea condition: Wave height below 1.5m, wind below 25 km/h (Beaufort Force 4). Caution zone: waves 1.5–2.5m, wind 25–40 km/h. Danger zone: waves above 2.5m or wind above 40 km/h — return to port.",
+      "text_ta": "பாதுகாப்பான கடல் நிலை: அலை உயரம் 1.5 மீட்டருக்கும் குறைவாக, காற்று 25 கி.மீ/மணிக்கும் குறைவாக இருக்க வேண்டும். அலை 2.5 மீட்டருக்கு மேல் அல்லது காற்று 40 கி.மீ மேல் இருந்தால் துறைமுகம் திரும்பவும்.",
+      "text_ml": "സുരക്ഷിത കടൽ അവസ്ഥ: തിരമാല 1.5 മീറ്ററിൽ കുറവ്, കാറ്റ് 25 കി.മീ/മണിക്കൂറിൽ കുറവ്. അലകൾ 2.5 മീറ്ററിൽ കൂടുതൽ അല്ലെങ്കിൽ കാറ്റ് 40 കി.മീ കൂടുതൽ ആണെങ്കിൽ തുറമുഖത്തേക്ക് മടങ്ങുക."
+    },
+    {
+      "doc_id": "safety_007",
+      "category": "safety",
+      "tags": [
+        "first aid",
+        "emergency",
+        "medical"
+      ],
+      "text": "Every fishing vessel should carry a basic first-aid kit including bandages, antiseptic, oral rehydration salts, and seasickness tablets. Coastal Police emergency number: 1093. Disaster Management: 1077.",
+      "text_ta": "ஒவ்வொரு மீன்பிடி படகிலும் அடிப்படை முதலுதவி பெட்டி வைத்திருக்க வேண்டும். கடலோர காவல் துறை அவசர நம்பர்: 1093. பேரிடர் மேலாண்மை: 1077.",
+      "text_ml": "ഓരോ മത്സ്യബന്ധന ബോട്ടിലും അടിസ്ഥാന ഫസ്റ്റ് എയ്ഡ് കിറ്റ് ഉണ്ടായിരിക്കണം. തീരദേശ പൊലീസ് അടിയന്തര നമ്പർ: 1093. ദുരന്ത നിവാരണം: 1077."
+    },
+    {
+      "doc_id": "safety_008",
+      "category": "safety",
+      "tags": [
+        "overloading",
+        "capacity",
+        "passengers"
+      ],
+      "text": "Never exceed the certified passenger and cargo capacity of your vessel. Overloading is a leading cause of capsizing. The capacity plate must be visible and complied with at all times.",
+      "text_ta": "உங்கள் படகின் அங்கீகரிக்கப்பட்ட பயணி மற்றும் சரக்கு திறனை எப்போதும் மீறக்கூடாது. அதிக சுமை கப்பல் கவிழ்வதற்கு முக்கிய காரணமாகும்.",
+      "text_ml": "നിങ്ങളുടെ ബോട്ടിന്റെ അംഗീകൃത യാത്രക്കാർ-ചരക്ക് ശേഷി ഒരിക്കലും കവിയരുത്. അമിത ഭാരം മറിഞ്ഞുവീഴലിന്റെ പ്രധാന കാരണമാണ്."
+    },
+    {
+      "doc_id": "safety_009",
+      "category": "safety",
+      "tags": [
+        "fuel",
+        "voyage planning",
+        "return fuel"
+      ],
+      "text": "Always carry at least 30% extra fuel reserve for your planned voyage. Calculate fuel consumption based on distance, engine speed, and expected current. Never return on less than 15% fuel.",
+      "text_ta": "திட்டமிட்ட பயணத்திற்கு குறைந்தது 30% கூடுதல் எரிபொருள் இருப்பு வைத்திருங்கள். 15% எரிபொருளுக்கும் குறைவாக திரும்பாதீர்கள்.",
+      "text_ml": "ആസൂത്രിത യാത്രയ്ക്ക് കുറഞ്ഞത് 30% അധിക ഇന്ധന ശേഖരം കൊണ്ടുപോകുക. 15%-ൽ കുറഞ്ഞ ഇന്ധനവുമായി മടങ്ങരുത്."
+    },
+    {
+      "doc_id": "safety_010",
+      "category": "safety",
+      "tags": [
+        "lightning",
+        "squall",
+        "thunderstorm"
+      ],
+      "text": "During a thunderstorm or squall, lower all antennas and metal structures. Move to the lowest point inside the vessel cabin. Avoid contact with metal equipment. Squalls can develop within 30 minutes with little warning.",
+      "text_ta": "இடி புயலின் போது அனைத்து ஆண்டெனாக்கள் மற்றும் உலோக கட்டமைப்புகளை கீழே இறக்கவும். படகு கேபினின் மிகவும் தாழ்வான இடத்திற்கு செல்லவும்.",
+      "text_ml": "ഇടിമിന്നൽ സമയത്ത് എല്ലാ ആന്റിനകളും ലോഹ ഘടനകളും താഴ്ത്തുക. ബോട്ട് ക്യാബിനിലെ ഏറ്റവും താഴ്ന്ന സ്ഥലത്തേക്ക് നീങ്ങുക."
+    },
+    {
+      "doc_id": "species_001",
+      "category": "species",
+      "tags": [
+        "mackerel",
+        "Indian mackerel",
+        "Rastrelliger kanagurta",
+        "season"
+      ],
+      "text": "Indian Mackerel (Rastrelliger kanagurta) is found in abundance from October to March along the Kerala and Tamil Nadu coasts. Peak season is November–February. Preferred depth: 20–60m. Target chlorophyll-rich upwelling zones.",
+      "text_ta": "இந்திய கானாங்கெளுத்தி (Rastrelliger kanagurta) கேரள மற்றும் தமிழ்நாடு கடற்கரைகளில் அக்டோபர் முதல் மார்ச் வரை அதிகமாக காணப்படுகிறது. விரும்பிய ஆழம்: 20–60 மீட்டர்.",
+      "text_ml": "ഇന്ത്യൻ അയല (Rastrelliger kanagurta) ഒക്ടോബർ മുതൽ മാർച്ച് വരെ കേരള-തമിഴ്‌നാട് തീരത്ത് സമൃദ്ധമായി കാണപ്പെടുന്നു. ആദ്യ സീസൺ: നവംബർ–ഫെബ്രുവരി. ഇഷ്ടപ്പെട്ട ആഴം: 20–60 മീറ്റർ."
+    },
+    {
+      "doc_id": "species_002",
+      "category": "species",
+      "tags": [
+        "sardine",
+        "oil sardine",
+        "Sardinella longiceps",
+        "season"
+      ],
+      "text": "Oil Sardine (Sardinella longiceps) abundance peaks from August to January. Found in dense schools near the surface in 10–40m depth. Strongly associated with upwelling events and high chlorophyll-a concentrations.",
+      "text_ta": "எண்ணெய் மத்தி (Sardinella longiceps) ஆகஸ்ட் முதல் ஜனவரி வரை அதிகமாக கிடைக்கும். 10–40 மீட்டர் ஆழத்தில் மேற்பரப்பில் அடர்த்தியான கூட்டங்களில் காணப்படும்.",
+      "text_ml": "എണ്ണ മത്തി (Sardinella longiceps) ആഗസ്ത് മുതൽ ജനുവരി വരെ ഏറ്റവും കൂടുതൽ കാണപ്പെടുന്നു. 10–40 മീറ്റർ ആഴത്തിൽ സ്ഥിതി ചെയ്യുന്ന ഉപ്‌വെല്ലിങ് മേഖലകളിൽ ഇടതൂർന്ന കൂട്ടങ്ങളായി കാണപ്പെടുന്നു."
+    },
+    {
+      "doc_id": "species_003",
+      "category": "species",
+      "tags": [
+        "yellowfin tuna",
+        "tuna",
+        "Thunnus albacares",
+        "deep sea"
+      ],
+      "text": "Yellowfin Tuna (Thunnus albacares) is abundant in the Arabian Sea from December to May. Best caught at 50–150m depth near temperature fronts between 26–29°C SST. Longlining and trolling are the most effective methods.",
+      "text_ta": "மஞ்சள் துடுப்பு சூரை (Thunnus albacares) டிசம்பர் முதல் மே வரை அரபிக் கடலில் ஏராளமாக காணப்படுகிறது. 50–150 மீட்டர் ஆழத்தில் 26–29°C கடல் மேற்பரப்பு வெப்பநிலை பகுதியில் சிறப்பாக பிடிக்கப்படுகிறது.",
+      "text_ml": "മഞ്ഞ ചൂര (Thunnus albacares) ഡിസംബർ മുതൽ മേ വരെ അറബിക്കടലിൽ ഏറ്റവും കൂടുതൽ കാണപ്പെടുന്നു. 26–29°C SST ഉള്ള താപ മേഖലകൾക്കടുത്ത് 50–150 മീറ്റർ ആഴത്തിൽ ഏറ്റവും ഫലപ്രദമാണ്."
+    },
+    {
+      "doc_id": "species_004",
+      "category": "species",
+      "tags": [
+        "seer fish",
+        "kingfish",
+        "Scomberomorus commerson",
+        "premium"
+      ],
+      "text": "Seer Fish / Kingfish (Scomberomorus commerson) is a premium species fetching high market prices. Available year-round but peaks October–March. Found at 30–80m depth. Often caught by trolling near rocky reefs and submarine ridges.",
+      "text_ta": "வஞ்சிரம் மீன் (Scomberomorus commerson) அக்டோபர்–மார்ச் உச்சத்துடன் ஆண்டு முழுவதும் கிடைக்கும். 30–80 மீட்டர் ஆழத்தில் கடலடி குன்றுகள் அருகே இழுவை மூலம் பிடிக்கப்படுகிறது.",
+      "text_ml": "നെയ്‌മീൻ / അയില (Scomberomorus commerson) ഉയർന്ന വിലനൽകുന്ന ഒരു ഉത്കൃഷ്ട ഇനമാണ്. ഒക്ടോബർ–മാർച്ച് കാലത്ത് ഏറ്റവും കൂടുതൽ കിട്ടും. 30–80 മീറ്റർ ആഴത്തിൽ ട്രോളിംഗ് വഴി പിടിക്കാം."
+    },
+    {
+      "doc_id": "species_005",
+      "category": "species",
+      "tags": [
+        "pomfret",
+        "silver pomfret",
+        "black pomfret",
+        "shallow"
+      ],
+      "text": "Silver Pomfret (Pampus argenteus) and Black Pomfret (Parastromateus niger) are found in 10–50m depth. Peak season: October–February. Both species favor muddy or sandy bottoms near estuaries. High commercial value.",
+      "text_ta": "வெள்ளி வௌ்வால் மற்றும் கருப்பு வௌ்வால் 10–50 மீட்டர் ஆழத்தில் காணப்படுகின்றன. உச்ச காலம்: அக்டோபர்–பிப்ரவரி. ஆற்றங்கரை அருகே மணல்/சேற்று அடிப்படையில் காணப்படும்.",
+      "text_ml": "വെള്ളി ആവോലി, കറുത്ത ആവോലി എന്നിവ 10–50 മീറ്റർ ആഴത്തിൽ കാണപ്പെടുന്നു. ഉച്ച സീസൺ: ഒക്ടോബർ–ഫെബ്രുവരി. നദീ സമീപ ചളി/മണൽ അടിത്തട്ടിലാണ് ഇവ കൂടുതൽ."
+    },
+    {
+      "doc_id": "species_006",
+      "category": "species",
+      "tags": [
+        "anchovy",
+        "nettle fish",
+        "Stolephorus",
+        "small pelagic"
+      ],
+      "text": "Anchovies (Stolephorus spp.) and Small Herrings are shallow-water species found at 5–20m depth. Best season: October–March. They school near the surface, especially at night, attracted to lights — a technique called 'light fishing.'",
+      "text_ta": "நெத்திலி மீன்கள் 5–20 மீட்டர் ஆழத்தில் காணப்படுகின்றன. சிறந்த காலம்: அக்டோபர்–மார்ச். இரவில் வெளிச்சத்தால் கவரப்பட்டு மேற்பரப்பில் கூட்டமாக வரும்.",
+      "text_ml": "നത്തോലി (Stolephorus spp.) 5–20 മീറ്റർ ആഴത്തിൽ കാണപ്പെടുന്നു. ഉത്തമ കാലം: ഒക്ടോബർ–മാർച്ച്. രാത്രിയിൽ പ്രകാശം ഉപയോഗിച്ചുള്ള 'ലൈറ്റ് ഫിഷിംഗ്' ഫലപ്രദമാണ്."
+    },
+    {
+      "doc_id": "species_007",
+      "category": "species",
+      "tags": [
+        "prawn",
+        "shrimp",
+        "Penaeus",
+        "bottom trawl"
+      ],
+      "text": "Penaeid Prawns (Penaeus monodon, P. indicus) are found at 20–80m depth on sandy-muddy bottoms. Peak season: August–November and February–April. Bottom trawling is the common harvest method but must respect monsoon ban periods.",
+      "text_ta": "இறால் மீன்கள் (Penaeus spp.) 20–80 மீட்டர் ஆழத்தில் மணல்/சேற்று அடிப்படையில் காணப்படும். உச்ச காலம்: ஆகஸ்ட்–நவம்பர் மற்றும் பிப்ரவரி–ஏப்ரல்.",
+      "text_ml": "ഞെണ്ടുകൾ/ചെമ്മീൻ (Penaeus spp.) 20–80 മീറ്റർ ആഴത്തിൽ ചളി/മണൽ അടിത്തട്ടിൽ. ഉച്ച കാലം: ആഗസ്ത്–നവംബർ, ഫെബ്രുവരി–ഏപ്രിൽ."
+    },
+    {
+      "doc_id": "species_008",
+      "category": "species",
+      "tags": [
+        "ribbon fish",
+        "hairtail",
+        "Trichiurus",
+        "night"
+      ],
+      "text": "Ribbon Fish / Hairtail (Trichiurus lepturus) is a nocturnal species found at 30–100m depth. Active at night near the seabed. Peak catch season: September–January along Kerala and Tamil Nadu coasts.",
+      "text_ta": "வாளை மீன் (Trichiurus lepturus) 30–100 மீட்டர் ஆழத்தில் காணப்படும் இரவு நேர இனம். உச்ச காலம்: செப்டம்பர்–ஜனவரி.",
+      "text_ml": "വാള (Trichiurus lepturus) 30–100 മീറ്റർ ആഴത്തിൽ. രാത്രിയിൽ കടൽ അടിത്തട്ടിൽ സജീവം. ഉച്ച കാലം: സെപ്റ്റംബർ–ജനുവരി."
+    },
+    {
+      "doc_id": "species_009",
+      "category": "species",
+      "tags": [
+        "cephalopod",
+        "squid",
+        "cuttlefish",
+        "octopus"
+      ],
+      "text": "Squid (Loligo duvaucelii), Cuttlefish (Sepia pharaonis), and Octopus (Octopus vulgaris) are best harvested from October to February. Found at 20–100m depth. Jigging and trawling are effective methods.",
+      "text_ta": "கணவாய், கொம்பு மீன் மற்றும் நத்தை மீன்கள் அக்டோபர் முதல் பிப்ரவரி வரை சிறப்பாக கிடைக்கும். 20–100 மீட்டர் ஆழத்தில் காணப்படும்.",
+      "text_ml": "ഇക (Loligo), കണവ (Sepia), ഓക്ടോപ്പസ് (Octopus) ഒക്ടോബർ–ഫെബ്രുവരി കാലയളവിൽ ഏറ്റവും നന്നായി ലഭിക്കും. 20–100 മീറ്റർ ആഴം."
+    },
+    {
+      "doc_id": "species_010",
+      "category": "species",
+      "tags": [
+        "seasonal chart",
+        "yearly calendar",
+        "planning"
+      ],
+      "text": "Annual fishing calendar for Kerala/Tamil Nadu: Jan–Feb (Mackerel, Tuna, Kingfish), Mar–May (Tuna, Pomfret), Jun–Aug (Monsoon ban, limited traditional fishing), Sep–Oct (Sardines), Nov–Dec (Mackerel, Sardines, Anchovies).",
+      "text_ta": "கேரள/தமிழ்நாடு ஆண்டு மீன்பிடி நாட்காட்டி: ஜன–பிப் (கானாங்கெளுத்தி, சூரை), மார்–மே (சூரை, வௌ்வால்), ஜூன்–ஆகஸ்ட் (பருவமழை தடை), செப்–அக்ட் (மத்தி), நவ–டிச் (கானாங்கெளுத்தி, மத்தி, நெத்திலி).",
+      "text_ml": "കേരള/തമിഴ്‌നാട് വാർഷിക മത്സ്യ കലണ്ടർ: ജനു–ഫെബ് (അയല, ചൂര), മാർ–മേ (ചൂര, ആവോലി), ജൂൺ–ആഗ (മഴക്കാല നിരോധനം), സെപ്–ഒക്ട് (മത്തി), നവ–ഡിസ (അയല, മത്തി, നത്തോലി)."
+    },
+    {
+      "doc_id": "pfz_001",
+      "category": "pfz",
+      "tags": [
+        "PFZ",
+        "INCOIS",
+        "advisory",
+        "chlorophyll"
+      ],
+      "text": "Potential Fishing Zone (PFZ) advisories are issued daily by INCOIS (Indian National Centre for Ocean Information Services) based on satellite-derived Sea Surface Temperature (SST) and chlorophyll-a data. They indicate areas of high fish concentration.",
+      "text_ta": "சாத்தியமான மீன்பிடி மண்டல (PFZ) ஆலோசனைகள் INCOIS ஆல் தினமும் வெளியிடப்படுகின்றன. அவை செயற்கைக்கோள் கடல் மேற்பரப்பு வெப்பநிலை மற்றும் குளோரோஃபில் தரவுகளை அடிப்படையாக கொண்டுள்ளன.",
+      "text_ml": "PFZ ഉപദേശ ബുള്ളറ്റിൻ INCOIS ദിവസേന ഉപഗ്രഹ SST, ക്ലോറോഫിൽ ഡാറ്റ ഉപയോഗിച്ച് പ്രസിദ്ധീകരിക്കുന്നു. ഉയർന്ന മത്സ്യ സാന്ദ്രതയുള്ള മേഖലകൾ ഇവ സൂചിപ്പിക്കുന്നു."
+    },
+    {
+      "doc_id": "pfz_002",
+      "category": "pfz",
+      "tags": [
+        "SST",
+        "sea surface temperature",
+        "optimal",
+        "fish aggregation"
+      ],
+      "text": "Fish aggregate near thermal fronts where two water masses of different temperatures meet. For Arabian Sea, optimal SST for mackerel and sardines is 27–29°C. Tuna prefer slightly cooler zones at 25–28°C.",
+      "text_ta": "வெவ்வேறு வெப்பநிலை கொண்ட இரண்டு நீர் நிரல்கள் சந்திக்கும் வெப்ப எல்லைகளில் மீன்கள் கூடும். அரபிக் கடலில் கானாங்கெளுத்தி மற்றும் மத்திக்கு சிறந்த SST 27–29°C.",
+      "text_ml": "വ്യത്യസ്ത ഊഷ്മാവുള്ള ജലപ്രവാഹങ്ങൾ ഒത്തുചേരുന്ന ' തെർമൽ ഫ്രണ്ടു'കളിൽ മത്സ്യങ്ങൾ ഒന്നിക്കുന്നു. അയലയ്ക്കും മത്തിക്കും 27–29°C SST അനുകൂലം."
+    },
+    {
+      "doc_id": "pfz_003",
+      "category": "pfz",
+      "tags": [
+        "chlorophyll front",
+        "upwelling",
+        "phytoplankton"
+      ],
+      "text": "High chlorophyll-a concentrations (above 1 mg/m³) indicate phytoplankton blooms that attract zooplankton, which in turn attract fish. Coastal upwelling during southwest monsoon brings nutrient-rich deep water to the surface, enhancing chlorophyll.",
+      "text_ta": "அதிக குளோரோஃபில்-a செறிவு (1 mg/m³ க்கு மேல்) மீன்களை கவரும் ஃபைட்டோபிளாங்க்டன் பூக்கலை குறிக்கிறது. தென்மேற்கு பருவமழையின் போது கரை வழி நீரோட்டம் ஆழமான நீரை மேல்நோக்கி கொண்டுவரும்.",
+      "text_ml": "ഉയർന്ന ക്ലോറോഫിൽ-a (1 mg/m³-ൽ കൂടുതൽ) ഫൈറ്റോപ്ലാങ്ക്ടൺ ബ്ലൂം സൂചിപ്പിക്കുന്നു. ഇത് മത്സ്യ സമ്പുഷ്ടതയ്ക്ക് കാരണമാകുന്നു."
+    },
+    {
+      "doc_id": "pfz_004",
+      "category": "pfz",
+      "tags": [
+        "EEZ",
+        "Exclusive Economic Zone",
+        "200 nautical miles",
+        "limit"
+      ],
+      "text": "India's Exclusive Economic Zone (EEZ) extends 200 nautical miles from the baseline. Foreign fishing vessels are prohibited in the EEZ. Indian fishermen must not cross the International Maritime Boundary Line (IMBL).",
+      "text_ta": "இந்தியாவின் பிரத்தியேக பொருளாதார மண்டலம் (EEZ) அடிப்படை கோட்டிலிருந்து 200 கடல் மைல் தூரம் வரை நீண்டுள்ளது. சர்வதேச கடல் எல்லை கோட்டை மீனவர்கள் கடக்கக்கூடாது.",
+      "text_ml": "ഇന്ത്യയുടെ EEZ അടിസ്ഥാന രേഖയിൽ നിന്ന് 200 നോട്ടിക്കൽ മൈൽ ദൂരം. അന്തർദ്ദേശീയ കടൽ അതിർത്തി (IMBL) കടക്കരുത്."
+    },
+    {
+      "doc_id": "pfz_005",
+      "category": "pfz",
+      "tags": [
+        "zone reading",
+        "course",
+        "bearing",
+        "navigation"
+      ],
+      "text": "PFZ advisories provide zone coordinates in latitude/longitude. To navigate there, determine the bearing using a compass or GPS. For example, a zone at 8.7°N, 76.4°E from Kollam (8.88°N, 76.59°E) is approximately 22 km southwest (bearing 218°).",
+      "text_ta": "PFZ ஆலோசனைகள் மண்டல ஆயத்தொலைவுகளை அட்சரேகை/தீர்க்கரேகையில் வழங்குகின்றன. திசை அறிவதற்கு திசைகாட்டி அல்லது GPS ஐ பயன்படுத்தவும். உதாரணம்: கொல்லம் (8.88°N, 76.59°E) இலிருந்து 8.7°N, 76.4°E மண்டலம் தென்மேற்கில் 22 கி.மீ (திசை 218°) தொலைவில் உள்ளது.",
+      "text_ml": "PFZ ഉപദേശ ബുള്ളറ്റിൻ ലക്ഷ്യ കോർഡിനേറ്റുകൾ ലാ/ലോ ആയി നൽകുന്നു. ദിശ ഗണിക്കാൻ GPS ഉപയോഗിക്കുക. ഉദാ: കൊല്ലത്തുനിന്ന് 8.7°N, 76.4°E-ലുള്ള സോൺ തെക്കുപടിഞ്ഞാറ് 22 കി.മീ (ദിശ 218°) ആണ്."
+    },
+    {
+      "doc_id": "pfz_006",
+      "category": "pfz",
+      "tags": [
+        "INCOIS",
+        "website",
+        "app",
+        "data access"
+      ],
+      "text": "INCOIS provides free PFZ advisories via the website incois.gov.in and the INCOIS mobile app. Advisories are updated daily and include maps showing fish aggregation zones along the Indian coastline. SMS alerts are also available by registration.",
+      "text_ta": "INCOIS இலவச PFZ ஆலோசனைகளை incois.gov.in வலைத்தளம் மற்றும் INCOIS மொபைல் பயன்பாட்டு மூலம் வழங்குகிறது. SMS விழிப்பூட்டல்களும் பதிவு மூலம் கிடைக்கும்.",
+      "text_ml": "INCOIS incois.gov.in, INCOIS ആപ്പ് എന്നിവ വഴി സൗജന്യ PFZ ഉപദേശം നൽകുന്നു. SMS അലേർട്ടുകൾ രജിസ്ട്രേഷൻ വഴി ലഭ്യമാണ്."
+    },
+    {
+      "doc_id": "weather_001",
+      "category": "weather",
+      "tags": [
+        "southwest monsoon",
+        "June",
+        "July",
+        "August",
+        "rough sea"
+      ],
+      "text": "Southwest monsoon (June–September) brings rough sea conditions to Kerala and Tamil Nadu coasts. Wind speeds typically reach 30–50 km/h, wave heights 2–4m. Most trawlers suspend operations. Traditional fishermen use small crafts only in sheltered nearshore areas.",
+      "text_ta": "தென்மேற்கு பருவமழை (ஜூன்–செப்டம்பர்) கேரள மற்றும் தமிழ்நாடு கடற்கரைகளில் கடுமையான கடல் நிலைமைகளை ஏற்படுத்துகிறது. காற்று வேகம் 30–50 கி.மீ/மணி, அலை உயரம் 2–4 மீட்டர்.",
+      "text_ml": "തെക്കുപടിഞ്ഞാറൻ മൺസൂൺ (ജൂൺ–സെപ്റ്റംബർ) കടുത്ത കടൽ അവസ്ഥ ഉണ്ടാക്കുന്നു. കാറ്റ് 30–50 കി.മീ/മണിക്കൂർ, തിരമാല 2–4 മീറ്റർ."
+    },
+    {
+      "doc_id": "weather_002",
+      "category": "weather",
+      "tags": [
+        "northeast monsoon",
+        "October",
+        "November",
+        "cyclone season"
+      ],
+      "text": "Northeast monsoon (October–December) brings cyclones to the Bay of Bengal. The Arabian Sea coast is relatively calmer but requires vigilance. Cyclone season peaks in October–November. Monitor IMD bulletins daily.",
+      "text_ta": "வடகிழக்கு பருவமழை (அக்டோபர்–டிசம்பர்) வங்காள விரிகுடாவில் சூறாவளிகளை கொண்டுவருகிறது. உச்ச சூறாவளி காலம்: அக்டோபர்–நவம்பர். IMD தகவல்களை தினமும் கவனிக்கவும்.",
+      "text_ml": "വടക്കുകിഴക്കൻ മൺസൂൺ (ഒക്ടോബർ–ഡിസംബർ) ബംഗാൾ ഉൾക്കടലിൽ ചുഴലിക്കാറ്റ് കൊണ്ടുവരുന്നു. ഉച്ച ചുഴലിക്കൊടുങ്കാറ്റ് കാലം: ഒക്ടോബർ–നവംബർ. IMD ബുള്ളറ്റിൻ ദിനേന ശ്രദ്ധിക്കുക."
+    },
+    {
+      "doc_id": "weather_003",
+      "category": "weather",
+      "tags": [
+        "Beaufort scale",
+        "wind speed",
+        "sea state"
+      ],
+      "text": "Beaufort Scale for fishermen: Force 1–3 (< 20 km/h) = Calm/Light breeze, ideal fishing; Force 4–5 (20–38 km/h) = Moderate breeze, small craft caution; Force 6 (39–49 km/h) = Strong breeze, return to port; Force 7+ (> 50 km/h) = Gale, extremely dangerous.",
+      "text_ta": "மீனவர்களுக்கான போஃபோர்ட் அளவு: படை 1–3 (< 20 கி.மீ/மணி) = அமைதியான, சிறந்த மீன்பிடி; படை 4–5 = மிதமான, சிறிய படகு எச்சரிக்கை; படை 6 = வலுவான காற்று, துறைமுகம் திரும்புக; படை 7+ = புயல், மிக ஆபத்தான.",
+      "text_ml": "ബ്യൂഫോർട്ട് സ്കെയിൽ: ഫോഴ്‌സ് 1–3 (< 20 കി.മீ) = ശാന്തം, ഉത്തമ; ഫോഴ്‌സ് 4–5 = ഇടത്തരം, ജാഗ്രത; ഫോഴ്‌സ് 6 = ശക്തമായ കാറ്റ്, തുറമുഖത്തേക്ക് മടങ്ങുക; ഫോഴ്‌സ് 7+ = ഭൂഷ്ടി, അതിപരുഷം."
+    },
+    {
+      "doc_id": "weather_004",
+      "category": "weather",
+      "tags": [
+        "fog",
+        "visibility",
+        "morning",
+        "radar"
+      ],
+      "text": "Dense sea fog can reduce visibility to near zero, especially in the pre-dawn hours (2–6 AM) from November to February. In fog, reduce speed, sound the fog signal every 2 minutes, and rely on GPS and radar if available.",
+      "text_ta": "அடர்ந்த கடல் மூடுபனி, குறிப்பாக நவம்பர் முதல் பிப்ரவரி வரை அதிகாலை (2–6 AM) நேரத்தில் தெரிவுத்திறனை கிட்டத்தட்ட பூஜ்ஜியமாக குறைக்கும். மூடுபனியில் வேகத்தை குறைத்து GPS பயன்படுத்தவும்.",
+      "text_ml": "നவംബർ–ഫെബ്രുവരി കാലത്ത് പുലർകാലത്ത് (2–6 AM) ഇടതൂർന്ന കടൽ മൂടൽ ദർശനം ഏതാണ്ട് പൂജ്യമാകാം. മൂടൽ ഘട്ടത്തിൽ വേഗം കുറച്ച് GPS ഉപയോഗിക്കുക."
+    },
+    {
+      "doc_id": "weather_005",
+      "category": "weather",
+      "tags": [
+        "IMD",
+        "weather forecast",
+        "marine bulletin",
+        "daily"
+      ],
+      "text": "IMD (India Meteorological Department) issues daily Marine Meteorological Bulletins for the Arabian Sea and Bay of Bengal. Available at mausam.imd.gov.in. Bulletins include wind speed, wave height, swell direction, visibility forecasts for next 48 hours.",
+      "text_ta": "IMD தினமும் அரபிக் கடல் மற்றும் வங்காள விரிகுடாவிற்கான கடல் வானிலை பத்திரிக்கைகளை வெளியிடுகிறது. mausam.imd.gov.in இல் கிடைக்கும். அடுத்த 48 மணி நேர முன்னறிவிப்புகள் உள்ளடங்கும்.",
+      "text_ml": "IMD ദിവസേന അറബിക്കടൽ, ബംഗാൾ ഉൾക്കടൽ കടൽ കാലാവസ്ഥ ബുള്ളറ്റിൻ പ്രസിദ്ധീകരിക്കുന്നു. mausam.imd.gov.in-ൽ ലഭ്യം. 48 മണിക്കൂർ പ്രവചനം ഉൾക്കൊള്ളുന്നു."
+    },
+    {
+      "doc_id": "nav_001",
+      "category": "navigation",
+      "tags": [
+        "GPS",
+        "waypoints",
+        "coordinates"
+      ],
+      "text": "Modern GPS units display latitude and longitude in decimal degrees (DD) or degrees-minutes (DM). For PFZ zones, INCOIS provides coordinates in DM format. Convert to DD by: DD = Degrees + Minutes/60. Ensure GPS datum is set to WGS84.",
+      "text_ta": "நவீன GPS பகுதிகள் அட்சரேகை மற்றும் தீர்க்கரேகையை DD அல்லது DM வடிவத்தில் காட்டும். INCOIS ஆயத்தொலைவுகளை DM வடிவில் வழங்குகிறது. மாற்றுதல்: DD = டிகிரி + நிமிடங்கள்/60.",
+      "text_ml": "GPS ഉദ്ദേശ്യ കോർഡിനേറ്റ് DD (ദശാംശ ഡിഗ്രി) അല്ലെങ്കിൽ DM (ഡിഗ്രി-മിനിറ്റ്) ആകാം. INCOIS DM ഫോർമാറ്റ് ഉപയോഗിക്കുന്നു. DD = ഡിഗ്രി + മിനിറ്റ്/60."
+    },
+    {
+      "doc_id": "nav_002",
+      "category": "navigation",
+      "tags": [
+        "compass",
+        "bearing",
+        "true north",
+        "magnetic"
+      ],
+      "text": "India's west coast magnetic variation is approximately +0.3° to +0.8° East. When using a magnetic compass, add this variation to get true bearing. The Arabian Sea coast has minimal variation, so magnetic bearings are close to true bearings.",
+      "text_ta": "இந்தியாவின் மேற்குக் கரை காந்த திரிவு +0.3° முதல் +0.8° கிழக்கு வரை உள்ளது. காந்த திசைகாட்டி உபயோகிக்கும் போது இந்த திரிவை சேர்க்கவும்.",
+      "text_ml": "ഇന്ത്യ പടിഞ്ഞാറൻ തീരത്ത് കാന്തിക വ്യതിയാനം +0.3° മുതൽ +0.8° കിഴക്ക് ആണ്. കാന്തിക ദിക്ക്-സൂചി ഉപയോഗിക്കുമ്പോൾ ഈ അളവ് കൂട്ടുക."
+    },
+    {
+      "doc_id": "nav_003",
+      "category": "navigation",
+      "tags": [
+        "tidal current",
+        "harbor entry",
+        "tide table"
+      ],
+      "text": "Harbor entry and exit should be timed with favorable tides. Neendakara harbor (Kollam) has a tidal range of ~1.2m. High tide occurs approximately 6h before and after low tide. The Kerala Fisheries Department publishes annual tide tables.",
+      "text_ta": "துறைமுக நுழைவு மற்றும் வெளியேற்றம் சாதகமான அலைகளுடன் நேரத்தை கணக்கிட வேண்டும். நீண்டகரா துறைமுகம் (கொல்லம்) ~1.2 மீட்டர் அலை வரம்பு கொண்டுள்ளது.",
+      "text_ml": "തുറമുഖ പ്രവേശനം അനുകൂല വേലിയേറ്റ സമയവുമായി ക്രമീകരിക്കുക. നീണ്ടകര (കൊല്ലം) ~1.2 മീ വേലിയേറ്റ ആഴം. കേരള ഫിഷറീസ് ഡിപ്പാർട്ടുമെൻ്റ് ടൈഡ് ടേബിൾ പ്രസിദ്ധീകരിക്കുന്നു."
+    },
+    {
+      "doc_id": "nav_004",
+      "category": "navigation",
+      "tags": [
+        "currents",
+        "Arabian Sea",
+        "longshore",
+        "drift"
+      ],
+      "text": "The Arabian Sea has two main current systems: the Southwest Monsoon Current (June–Sep, northward, strong 1–3 knots) and the Northeast Monsoon Current (November–February, southward, 0.5–1.5 knots). Account for these when planning routes.",
+      "text_ta": "அரபிக் கடலில் இரண்டு முக்கிய நீரோட்ட அமைப்புகள் உள்ளன: தென்மேற்கு பருவமழை நீரோட்டம் (ஜூன்–செப், வடக்கு நோக்கி) மற்றும் வடகிழக்கு பருவமழை நீரோட்டம் (நவ–பிப், தெற்கு நோக்கி).",
+      "text_ml": "അറബിക്കടലിൽ രണ്ട് പ്രധാന പ്രവാഹ വ്യവസ്ഥ: SW മൺസൂൺ കറണ്ട് (ജൂൺ–സെപ്, വടക്കോട്ട്), NE മൺസൂൺ കറണ്ട് (നവ–ഫെബ്, തെക്കോട്ട്). ഇവ റൂട്ട് ആസൂത്രണത്തിൽ കണക്കിലെടുക്കുക."
+    },
+    {
+      "doc_id": "nav_005",
+      "category": "navigation",
+      "tags": [
+        "anchor",
+        "seabed",
+        "shallow water",
+        "mooring"
+      ],
+      "text": "When anchoring, ensure sufficient scope: anchor chain length should be 5–7 times the water depth. Sandy and muddy bottoms offer good holding. Rocky bottoms may cause anchor dragging. Always rig an anchor trip line in rocky areas.",
+      "text_ta": "நங்கூரம் போடும் போது, நங்கூரம் சங்கிலி நீளம் தண்ணீர் ஆழத்தை விட 5–7 மடங்கு அதிகமாக இருக்கும் சுவிட்ச்சை உறுதிப்படுத்தவும். மணல் மற்றும் சேற்று அடிப்படைகள் நல்ல பிடிமானத்தை வழங்குகின்றன.",
+      "text_ml": "ആங്കർ ഇടുമ്പോൾ, ചങ്ങലയുടെ ദൈർഘ്യം ജലത്തിന്റെ ആഴത്തിന്റെ 5–7 മടങ്ങ് ആകണം. മണൽ/ചളി അടിത്തട്ട് നല്ല ഉറക്കം നൽകുന്നു. പാറ കൂടുതലായ സ്ഥലത്ത് ആങ്കർ ട്രിപ് ലൈൻ ഇടുക."
+    },
+    {
+      "doc_id": "reg_001",
+      "category": "regulations",
+      "tags": [
+        "license",
+        "permit",
+        "fishing license",
+        "boat registration"
+      ],
+      "text": "All mechanized fishing vessels in India must be registered with the State Fisheries Department and carry a valid fishing license. The vessel registration number must be painted on the hull. Operating without a license is a punishable offense.",
+      "text_ta": "இந்தியாவில் அனைத்து இயந்திர மீன்பிடி படகுகளும் மாநில மீன்வளத் துறையில் பதிவு செய்யப்பட்டு சரியான மீன்பிடி உரிமம் வைத்திருக்க வேண்டும்.",
+      "text_ml": "ഇന്ത്യയിലെ എല്ലാ യന്ത്ര മത്സ്യബന്ധന ബോട്ടുകളും സംസ്ഥാന ഫിഷറീസ് ഡിപ്പാർട്ടുമെൻ്റിൽ രജിസ്റ്റർ ചെയ്ത് സാധുവായ ലൈസൻസ് കൈവശം വെക്കണം."
+    },
+    {
+      "doc_id": "reg_002",
+      "category": "regulations",
+      "tags": [
+        "territorial waters",
+        "12 nautical miles",
+        "coastal zone"
+      ],
+      "text": "India's territorial waters extend 12 nautical miles from the baseline. Fishing is regulated within this zone. The Coastal Regulation Zone (CRZ) prohibits construction within 500m of the High Tide Line (HTL) to protect marine ecosystems.",
+      "text_ta": "இந்தியாவின் ஆள்புலை கடல் அடிப்படை கோட்டிலிருந்து 12 கடல் மைல் தூரம் வரை நீண்டுள்ளது. கடல் சூழலை பாதுகாக்க HTL இலிருந்து 500 மீட்டருக்குள் கட்டுமானம் தடைசெய்யப்பட்டுள்ளது.",
+      "text_ml": "ഇന്ത്യ ടെരിറ്റോറിയൽ ജലം 12 നോട്ടിക്കൽ മൈൽ. HTL-ൽ നിന്ന് 500 മീ. ഉള്ളിൽ നിർമ്മാണം CRZ നിയമം നിരോധിക്കുന്നു."
+    },
+    {
+      "doc_id": "reg_003",
+      "category": "regulations",
+      "tags": [
+        "trawl net",
+        "mesh size",
+        "legal mesh",
+        "juvenile fish"
+      ],
+      "text": "Minimum legal mesh size for trawl nets targeting commercial fish is 35mm (stretched mesh). Using smaller mesh traps juvenile fish and damages the ecosystem. Violations are subject to confiscation and fines under the Marine Fishing Regulation Act.",
+      "text_ta": "வணிக மீன்களை குறிவைக்கும் இழுவை வலைகளுக்கு குறைந்தபட்ச சட்டப்பூர்வ வலைக்கண் அளவு 35 மி.மீ (நீட்சி வலைக்கண்). சிறிய வலைக்கண் இளம் மீன்களை சிக்க வைத்து சூழலை சேதப்படுத்தும்.",
+      "text_ml": "വാണിജ്യ ട്രോൾ ജാലകത്തിന്റെ ഏറ്റവും കുറഞ്ഞ നിയമ മെഷ് വലിപ്പം 35 mm (stretched). ചെറിയ മെഷ് ഉപയോഗം ശിക്ഷാർഹമായ കുറ്റം."
+    },
+    {
+      "doc_id": "reg_004",
+      "category": "regulations",
+      "tags": [
+        "protected species",
+        "sea turtle",
+        "dugong",
+        "whale shark"
+      ],
+      "text": "Sea turtles (all species), Dugongs, Whale Sharks (Rhincodon typus), and Irrawaddy Dolphins are protected under the Wildlife Protection Act 1972. If accidentally caught, they must be released alive immediately. Report by-catch to Coast Guard.",
+      "text_ta": "கடல் ஆமைகள், டுகாங்கள், திமிங்கல சுறாக்கள் மற்றும் ஐராவதி டால்பின்கள் 1972 வனவிலங்கு பாதுகாப்புச் சட்டத்தின் கீழ் பாதுகாக்கப்படுகின்றன. தற்செயலாக பிடிக்கப்பட்டால் உடனடியாக விடுவிக்க வேண்டும்.",
+      "text_ml": "കടൽ ആമ, ഡുഗോങ്, തിമിംഗല ഷാർക്ക്, ഇർരവദ്ദി ഡോൾഫിൻ 1972 വന്യജീവി സംരക്ഷണ നിയമ പ്രകാരം സംരക്ഷിതരാണ്. ആകസ്മിക ക്യാച്ച് ഉടൻ ജീവനോടെ നദിയിൽ ഇടുക."
+    },
+    {
+      "doc_id": "reg_005",
+      "category": "regulations",
+      "tags": [
+        "IMBL",
+        "Sri Lanka",
+        "border",
+        "Palk Strait"
+      ],
+      "text": "The International Maritime Boundary Line (IMBL) between India and Sri Lanka runs through the Palk Strait and Gulf of Mannar. Indian fishermen must not cross this line. Violations have led to arrest by Sri Lankan navy. Use GPS to maintain safe distance.",
+      "text_ta": "இந்தியா மற்றும் இலங்கைக்கு இடையேயான சர்வதேச கடல் எல்லைக் கோடு பாக் நீரிணை மற்றும் மன்னார் வளைகுடா வழியாக செல்கிறது. இந்திய மீனவர்கள் இந்த கோட்டை கடக்கக்கூடாது.",
+      "text_ml": "ഇന്ത്യ-ശ്രീലങ്ക IMBL പൽക്ക് കടലിടുക്കിലൂടെ. ഇന്ത്യൻ മത്സ്യത്തൊഴിലാളികൾ ഇത് കടക്കരുത്. GPS ഉപയോഗിച്ച് സുരക്ഷിത ദൂരം നിലനിർത്തുക."
+    },
+    {
+      "doc_id": "gear_001",
+      "category": "gear",
+      "tags": [
+        "gill net",
+        "surface gill net",
+        "drift gill net"
+      ],
+      "text": "Drift gill nets are used for surface-swimming species like mackerel and sardines. Net length typically 500m–1km. Best deployed at dusk, retrieved at dawn. Attach floats at top and sinkers at bottom to maintain vertical orientation.",
+      "text_ta": "மிதவை கில் வலைகள் கானாங்கெளுத்தி மற்றும் மத்தி போன்ற மேற்பரப்பு இனங்களுக்கு பயன்படுத்தப்படுகின்றன. வலை நீளம் பொதுவாக 500 மீட்டர்–1 கிலோமீட்டர். மாலை போட்டு அதிகாலையில் எடுக்கவும்.",
+      "text_ml": "ഡ്രിഫ്റ്റ് ഗിൽ നെറ്റ് അയല, മത്തി ആദിയ ഉപരിതല ഇനങ്ങൾക്ക്. നെറ്റ് ദൈർഘ്യം 500m–1km. സന്ധ്യക്ക് ഇട്ട്, പുലർകാലത്ത് വലിക്കുക."
+    },
+    {
+      "doc_id": "gear_002",
+      "category": "gear",
+      "tags": [
+        "longline",
+        "tuna",
+        "hook",
+        "deep water"
+      ],
+      "text": "Longlines are most effective for deep-water species like Tuna and Seer Fish. Main line can extend 10–50 km with branch lines (snoods) every 30–50m. Use circle hooks to minimize sea turtle bycatch. Bait with sardines or squid.",
+      "text_ta": "நீண்ட கோடுகள் சூரை மற்றும் வஞ்சிரம் போன்ற ஆழ் நீர் இனங்களுக்கு மிகவும் பயனுள்ளவை. முக்கிய கோடு 10–50 கிலோமீட்டர் வரை நீண்டிருக்கும். கடல் ஆமைகளின் தற்செயல் பிடிப்பை குறைக்க வட்ட கொக்கிகளை பயன்படுத்தவும்.",
+      "text_ml": "ലോംഗ്‌ലൈൻ ചൂര, നെയ്‌മീൻ പോലുള്ള ആഴ്ക്കടൽ ഇനങ്ങൾക്ക് ഫലപ്രദം. മെയിൻ ലൈൻ 10–50 km. കടൽ ആമ ബൈ-ക്യാച്ച് കുറയ്ക്കാൻ സർക്കിൾ ഹുക്ക് ഉപയോഗിക്കുക."
+    },
+    {
+      "doc_id": "gear_003",
+      "category": "gear",
+      "tags": [
+        "purse seine",
+        "school fish",
+        "sardine",
+        "anchovy"
+      ],
+      "text": "Purse seines are used to encircle large schools of small pelagics (sardines, anchovies, mackerel). The net is set around the school and then the bottom is pursed shut. Most efficient at night near a fish aggregating device (FAD) with lights.",
+      "text_ta": "பர்ஸ் சீன் வலைகள் சிறிய மேல் இனங்களின் (மத்தி, நெத்திலி, கானாங்கெளுத்தி) பெரிய கூட்டங்களை சூழ்வதற்கு பயன்படுத்தப்படுகின்றன. இரவில் FAD விளக்குகளுடன் மிகவும் திறம்படச் செயல்படும்.",
+      "text_ml": "പഴ്‌സ് സൈൻ ചെറിയ പെലാജിക് ഇനങ്ങൾ (മത്തി, നത്തോലി) ഉൾക്കൊള്ളാൻ ഉപയോഗിക്കുന്നു. FAD-ലൈറ്റ് ഉപയോഗിച്ച് രാത്രിയിൽ ഏറ്റവും ഫലപ്രദം."
+    },
+    {
+      "doc_id": "gear_004",
+      "category": "gear",
+      "tags": [
+        "FAD",
+        "fish aggregation device",
+        "light fishing"
+      ],
+      "text": "Fish Aggregating Devices (FADs) are floating objects that attract fish due to shade and structure. Underwater lights (green/blue LED) at 20–50m depth are extremely effective for attracting squid and small pelagics at night.",
+      "text_ta": "மீன் திரட்டல் சாதனங்கள் (FAD) மீன்களை நிழல் மற்றும் அமைப்பு காரணமாக கவரும் மிதக்கும் பொருட்கள். 20–50 மீட்டர் ஆழத்தில் நீர்மூழ்கிய LED விளக்குகள் இரவில் கணவாய் மற்றும் சிறிய மேல் மீன்களை கவர்வதில் மிகவும் பயனுள்ளவை.",
+      "text_ml": "FAD ഒഴുകുന്ന ഘടനകൾ — മത്സ്യം തണൽ-ഘടന കൊണ്ട് ആകൃഷ്ടമാകുന്നു. 20–50 മീ. ആഴ്ക്കടലിൽ ഗ്രീൻ/ബ്ലൂ LED ഇക, നത്തോലി ആകർഷിക്കും."
+    },
+    {
+      "doc_id": "tides_001",
+      "category": "tides",
+      "tags": [
+        "spring tide",
+        "neap tide",
+        "lunar cycle",
+        "fishing"
+      ],
+      "text": "Spring tides (full moon and new moon) create strong tidal currents and higher water levels — good for cast-net and gill-net fishing near estuaries. Neap tides (quarter moon) produce calmer currents — preferred for longlining.",
+      "text_ta": "வசந்த அலைகள் (பௌர்ணமி மற்றும் அமாவாசை) வலுவான ஓட்ட நீரோட்டங்களை உருவாக்குகின்றன. வில்வு அலைகள் (பாதி நிலவு) அமைதியான நீரோட்டங்களை உருவாக்குகின்றன - நீண்ட கோடு மீன்பிடிக்கு விரும்பத்தக்கது.",
+      "text_ml": "സ്‌പ്രിംഗ് ടൈഡ് (പൌർണ്ണമി, അമാവാസി) ശക്തമായ ജോൺ ഒഴുക്ക് — അഴിമുഖ ഗിൽ-നെറ്റ് ഫിഷിംഗിന് നല്ലത്. നീപ് ടൈഡ് (ക്വാർട്ടർ ചന്ദ്രൻ) ശാന്തമായ ഒഴുക്ക് — ലോംഗ്‌ലൈൻ ഫിഷിംഗിന് അനുകൂലം."
+    },
+    {
+      "doc_id": "tides_002",
+      "category": "tides",
+      "tags": [
+        "high tide",
+        "low tide",
+        "timing",
+        "fish activity"
+      ],
+      "text": "Fish are generally most active during the 2 hours before and after high tide (incoming and outgoing tidal currents). Many species like Pomfret and Snapper move inshore with the flood tide to feed. Plan fishing trips to be at the zone during tide change.",
+      "text_ta": "மீன்கள் பொதுவாக அதிக அலையின் 2 மணி நேரத்திற்கு முன்னும் பின்னும் மிகவும் சுறுசுறுப்பாக இருக்கும். அலை மாற்றத்தின் போது மீன்பிடி மண்டலத்தில் இருக்கும்படி திட்டமிடுங்கள்.",
+      "text_ml": "ഹൈ ടൈഡിന് 2 മണിക്കൂർ മുൻ-ശേഷം മത്സ്യ ക്രിയ ഏറ്റവും ഉണർവ്. ആവോലി, സ്നാപ്പർ ഫ്ലഡ് ടൈഡ് വഴി തൂടരായി ആഴം കുറഞ്ഞ ഭാഗത്ത് ഭക്ഷണം തേടുന്നു."
+    },
+    {
+      "doc_id": "ocean_001",
+      "category": "ocean",
+      "tags": [
+        "upwelling",
+        "Arabian Sea",
+        "Kerala coast",
+        "productivity"
+      ],
+      "text": "Kerala coast experiences intense coastal upwelling during the southwest monsoon (June–August). This brings cold, nutrient-rich water to the surface, creating one of the world's most productive fishing zones. Post-upwelling period (Sep–Oct) sees the highest fish catches.",
+      "text_ta": "கேரள கடற்கரை தென்மேற்கு பருவமழையின் போது (ஜூன்–ஆகஸ்ட்) தீவிர கரை வழி நீரோட்டத்தை அனுபவிக்கிறது. இது குளிர்ந்த, ஊட்டச்சத்து நிறைந்த நீரை மேற்பரப்பிற்கு கொண்டுவருகிறது. செப்-அக்ட் காலத்தில் மீன் பிடிப்பு அதிகமாக இருக்கும்.",
+      "text_ml": "SW മൺസൂൺ കാലത്ത് (ജൂൺ–ആഗ) കേരള തീരം തീവ്ര ഉപ്‌വെല്ലിംഗ് അനുഭവിക്കുന്നു. ഇത് ലോകത്തിലെ ഏറ്റവും ഉൽപ്പാദനക്ഷമമായ മത്സ്യ മേഖലകളിലൊന്ന് സൃഷ്ടിക്കുന്നു. ഉപ്‌വെല്ലിംഗ് ശേഷം (സെപ്-ഒക്ടോ) ഏറ്റവും ഉയർന്ന ക്യാച്ച്."
+    },
+    {
+      "doc_id": "ocean_002",
+      "category": "ocean",
+      "tags": [
+        "salinity",
+        "freshwater",
+        "post monsoon",
+        "estuarine"
+      ],
+      "text": "After the monsoon season, freshwater discharge from rivers reduces coastal salinity. Fish that prefer higher salinity (tuna, mackerel) move slightly offshore. Estuarine species (mullet, bream) move inshore as salinity recovers in November.",
+      "text_ta": "பருவமழை காலத்திற்கு பிறகு, ஆறுகளிலிருந்து நீரோட்டம் கரை உப்பு உள்ளடக்கத்தை குறைக்கிறது. அதிக உப்பு விரும்பும் மீன்கள் (சூரை, கானாங்கெளுத்தி) வெளியே நகரும். நவம்பரில் உப்புத்தன்மை மீட்கப்படும் போது எஸ்டுவரைன் இனங்கள் கரைக்கு வரும்.",
+      "text_ml": "മൺസൂണിന് ശേഷം, നദികൾ ഒഴുക്ക് ഉപ്പ് ഉള്ളടക്കം കുറയ്ക്കുന്നു. ഉയർന്ന ഉപ്പ് ഇഷ്ടപ്പെടുന്ന ഇനങ്ങൾ (ചൂര, അയല) ഓഫ്‌ഷോർ നീങ്ങുന്നു. നവംബറിൽ ഉപ്പ് തിരിച്ചു വന്നാൽ മുള്ളൻ ഇൻഷോർ വരും."
+    },
+    {
+      "doc_id": "ocean_003",
+      "category": "ocean",
+      "tags": [
+        "oxygen minimum zone",
+        "OMZ",
+        "dead zone",
+        "hypoxic"
+      ],
+      "text": "The Arabian Sea has a well-known Oxygen Minimum Zone (OMZ) at 150–1000m depth. Fish avoid this layer, aggregating above it. Knowledge of OMZ depth helps set gear at the correct depth where fish are most active.",
+      "text_ta": "அரபிக் கடலில் 150–1000 மீட்டர் ஆழத்தில் ஆக்சிஜன் குறைந்த மண்டலம் (OMZ) உள்ளது. மீன்கள் இந்த அடுக்கை தவிர்த்து அதற்கு மேல் கூடுகின்றன. OMZ ஆழம் அறிவது சரியான ஆழத்தில் கருவி அமைக்க உதவுகிறது.",
+      "text_ml": "അറബിക്കടലിൽ 150–1000 മീ. ആഴ്ക്കടലിൽ OMZ ഉണ്ട്. മത്സ്യം ഈ പ്രദേശം ഒഴിവാക്കി അതിന്‌ മുകളിൽ ഒന്നിക്കുന്നു. OMZ ആഴം അറിഞ്ഞ് ശരിയായ ഡെപ്ത്തിൽ ഗിയർ ഇടുക."
+    },
+    {
+      "doc_id": "harbor_001",
+      "category": "harbor",
+      "tags": [
+        "Neendakara",
+        "Kollam",
+        "harbor",
+        "facilities"
+      ],
+      "text": "Neendakara Fishing Harbor (Kollam, Kerala) is one of the largest fishing harbors in Kerala. It provides ice plants, fish processing facilities, fuel depot, boat repair, and net mending services. Cold chain facilities available. Coordinates: 8.93°N, 76.55°E.",
+      "text_ta": "நீண்டகரை மீன்பிடி துறைமுகம் (கொல்லம், கேரளா) கேரளாவின் மிகப்பெரிய மீன்பிடி துறைமுகங்களில் ஒன்றாகும். பனி ஆலைகள், மீன் பதப்படுத்துதல் வசதிகள், எரிபொருள் டிப்போ, படகு பழுதுபார்த்தல் சேவைகள் வழங்குகிறது. ஆயத்தொலைவு: 8.93°N, 76.55°E.",
+      "text_ml": "നീണ്ടകര ഫിഷിംഗ് ഹാർബർ (കൊല്ലം, കേരളം) കേരളത്തിലെ ഏറ്റവും വലിയ തുറമുഖങ്ങളിലൊന്നാണ്. ഐസ് പ്ലാന്റ്, ഫിഷ് പ്രോസസ്സിംഗ്, ഇന്ധന ഡിപ്പോ, ബോട്ട് റിപ്പയർ. നിർദ്ദേശാംകം: 8.93°N, 76.55°E."
+    },
+    {
+      "doc_id": "harbor_002",
+      "category": "harbor",
+      "tags": [
+        "Chennai",
+        "Tamil Nadu",
+        "harbor",
+        "Kasimedu"
+      ],
+      "text": "Kasimedu Fishing Harbor (Chennai, Tamil Nadu) is the major hub for fishing vessels along the northern Tamil Nadu coast. Operating hours: 4 AM to 10 PM. Fuel, ice, unloading, and auction facilities available. Coordinates: 13.11°N, 80.30°E.",
+      "text_ta": "காசிமேடு மீன்பிடி துறைமுகம் (சென்னை, தமிழ்நாடு) வடக்கு தமிழ்நாடு கடற்கரையில் மீன்பிடி படகுகளுக்கான முக்கிய மையமாகும். இயக்க நேரம்: காலை 4 முதல் இரவு 10 வரை. ஆயத்தொலைவு: 13.11°N, 80.30°E.",
+      "text_ml": "കാസിമേദ് ഫിഷിംഗ് ഹാർബർ (ചെന്നൈ, തമിഴ്‌നാട്) ഉത്തര TN-ലെ മത്സ്യ ഹബ്. 4 AM–10 PM. ഇന്ധനം, ഐസ്, അൺലോഡ്, ലേലം. നിർദ്ദേശാംകം: 13.11°N, 80.30°E."
+    },
+    {
+      "doc_id": "harbor_003",
+      "category": "harbor",
+      "tags": [
+        "Vizhinjam",
+        "harbor",
+        "deep sea",
+        "deep water port"
+      ],
+      "text": "Vizhinjam International Seaport (Thiruvananthapuram, Kerala) is a deep-water port under development. The adjacent Vizhinjam fishing harbor serves traditional and motorized fishing vessels. Known for proximity to Lakshadweep Sea tuna grounds.",
+      "text_ta": "விழிஞ்சம் சர்வதேச கடல்துறை (திருவனந்தபுரம்) ஆழ் நீர் துறைமுகம். அருகிலுள்ள விழிஞ்சம் மீன்பிடி துறைமுகம் லட்சத்தீவு கடல் சூரை மண்டலங்களுக்கு அருகில் உள்ளது.",
+      "text_ml": "വിഴിഞ്ഞം ഇന്റർനാഷണൽ സീപോർട്ട് (തിരുവനന്തപുരം) — ആഴ്ക്കടൽ തുറമുഖം. ലക്ഷദ്വീപ് കടൽ ചൂര മേഖലകൾക്ക് അടുത്ത്."
+    },
+    {
+      "doc_id": "general_001",
+      "category": "general",
+      "tags": [
+        "ORCA",
+        "AI",
+        "assistant",
+        "marine intelligence"
+      ],
+      "text": "ORCA (Marine Ecosystem Reasoning with Collaborative Agents) is an AI-powered marine advisory system that integrates satellite weather data, ocean state data, PFZ advisories, and AI reasoning to provide real-time fishing guidance in English, Tamil, and Malayalam.",
+      "text_ta": "ORCA (கடல் சூழல் சிந்தனை மற்றும் கூட்டு முகவர்கள்) என்பது செயற்கை நுண்ணறிவு மூலம் இயக்கப்படும் கடல் ஆலோசனை அமைப்பு. ஆங்கிலம், தமிழ் மற்றும் மலையாளத்தில் மீன்பிடி வழிகாட்டுதல் வழங்குகிறது.",
+      "text_ml": "ORCA (Marine Ecosystem Reasoning with Collaborative Agents) — ഉപഗ്രഹ ഡാറ്റ, PFZ, AI ചേർന്ന് ഇംഗ്ലീഷ്, തമിഴ്, മലയാളം ഭാഷകളിൽ മത്സ്യ ഉപദേശം നൽകുന്ന സംവിധാനം."
+    },
+    {
+      "doc_id": "general_002",
+      "category": "general",
+      "tags": [
+        "fish price",
+        "market",
+        "auction",
+        "value"
+      ],
+      "text": "Fish prices vary by season, species, and market. Common price ranges (approximate, Kerala 2024): Indian Mackerel ₹80–150/kg, Sardines ₹40–80/kg, Yellowfin Tuna ₹350–600/kg, Kingfish ₹400–800/kg, Tiger Prawns ₹500–900/kg. Prices peak in summer when supply is low.",
+      "text_ta": "மீன் விலை பருவம், இனம் மற்றும் சந்தையால் மாறுபடுகிறது. பொதுவான விலை வரம்பு (தோராயம், 2024): கானாங்கெளுத்தி ₹80–150/கிலோ, மத்தி ₹40–80/கிலோ, மஞ்சள் துடுப்பு சூரை ₹350–600/கிலோ.",
+      "text_ml": "മത്സ്യ വില സീസൺ, ഇനം, മാർക്കറ്റ് അനുസരിച്ച് വ്യത്യസ്തം. ഏകദേശ വില (കേരളം 2024): അയല ₹80–150/kg, മത്തി ₹40–80/kg, ചൂര ₹350–600/kg, നെയ്‌മീൻ ₹400–800/kg."
+    },
+    {
+      "doc_id": "general_003",
+      "category": "general",
+      "tags": [
+        "ice",
+        "cold chain",
+        "fish preservation",
+        "post-harvest"
+      ],
+      "text": "Proper icing is critical for fish quality. Use 1:1 ice to fish ratio for trips under 1 day, 2:1 for 2-day trips. Fish should reach 0°C within 2 hours of harvest. Poorly iced fish lose market value within 4–6 hours at tropical temperatures.",
+      "text_ta": "மீன் தரத்திற்கு சரியான பனி போடுதல் முக்கியமானது. 1 நாள் பயணத்திற்கு 1:1 பனி-மீன் விகிதம், 2 நாள் பயணத்திற்கு 2:1 விகிதம் பயன்படுத்தவும்.",
+      "text_ml": "ഫിഷ് ഐസിംഗ് ഗുണനിലവാരം നിലനിർത്താൻ നിർണ്ണായകം. 1 ദിന യാത്ര: 1:1 ഐസ്-ഫിഷ്; 2 ദിന: 2:1. ഉഷ്ണ മേഖലയിൽ 4–6 മണിക്കൂറിനുള്ളിൽ ഐസ് ഇടാത്ത മത്സ്യം മൂല്യം നഷ്ടപ്പെടുന്നു."
+    },
+    {
+      "doc_id": "general_004",
+      "category": "general",
+      "tags": [
+        "Kollam",
+        "coast",
+        "fishing ground",
+        "zone"
+      ],
+      "text": "Kollam Coast (Neendakara to Tangasseri) is one of Kerala's most productive fishing zones. The continental shelf extends 30km offshore before dropping to 200m. Key fishing grounds: 8–22 km southwest for mackerel/sardines, 15–40 km south for tuna.",
+      "text_ta": "கொல்லம் கடற்கரை (நீண்டகரை முதல் தங்கசேரி வரை) கேரளாவின் மிகவும் உற்பத்திகரமான மீன்பிடி மண்டலங்களில் ஒன்றாகும். முக்கிய மீன்பிடி மண்டலங்கள்: கானாங்கெளுத்தி/மத்திக்கு 8–22 கி.மீ தென்மேற்கு, சூரைக்கு 15–40 கி.மீ தெற்கு.",
+      "text_ml": "കൊല്ലം തീരം (നീണ്ടകര–തങ്കശ്ശേരി) കേരളത്തിലെ ഏറ്റവും ഉൽപ്പാദനക്ഷമമായ മൂന്ന് മേഖലകളിലൊന്ന്. അയലക്ക് 8–22 km, ചൂരയ്ക്ക് 15–40 km തെക്ക്."
+    },
+    {
+      "doc_id": "general_005",
+      "category": "general",
+      "tags": [
+        "government scheme",
+        "kisan",
+        "fisherman welfare",
+        "insurance"
+      ],
+      "text": "Indian fishermen are entitled to welfare schemes including PMMSY (Pradhan Mantri Matsya Sampada Yojana), fisherman insurance under Pradhan Mantri Jeevan Jyoti Bima Yojana, and state-specific fuel subsidies. Register via local Fisheries Department offices.",
+      "text_ta": "இந்திய மீனவர்களுக்கு PMMSY, PMJJBY காப்பீடு, மாநில எரிபொருள் மானியங்கள் உள்ளிட்ட நலத் திட்டங்கள் உரிமை உள்ளது. உள்ளூர் மீன்வளத் துறை அலுவலகங்கள் வழியாக பதிவு செய்யவும்.",
+      "text_ml": "ഇന്ത്യൻ മത്സ്യത്തൊഴിലാളികൾ PMMSY, PMJJBY ഇൻഷൂറൻസ്, ഇന്ധന സബ്‌സിഡി ആദി ക്ഷേമ പദ്ധതികൾ ലഭ്യമാക്കാം. ലോക്കൽ ഫിഷറീസ് ഓഫീസ് വഴി രജിസ്ട്രേഷൻ."
+    }
+  ]
+}

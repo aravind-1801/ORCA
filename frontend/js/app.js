@@ -131,6 +131,10 @@
     return `${d}m`;
   }
 
+  function t(k) {
+    return window.orcaI18n ? window.orcaI18n.t(k, currentLanguage) : k;
+  }
+
   // ── Centralized Reactive Application Store ───────────────────────────────
   const savedProfile = (() => {
     try { return JSON.parse(localStorage.getItem('orca_profile') || '{}'); } catch (e) { return {}; }
@@ -785,9 +789,12 @@
       if (answerEl) answerEl.textContent = res.response;
       const sourceEl = document.getElementById('orca-response-source');
       if (sourceEl) {
-        if (res.llm_paraphrase_used) sourceEl.textContent = 'Source: AI';
-        else if (res.llm_used) sourceEl.textContent = 'Source: AI (facts appended)';
-        else sourceEl.textContent = 'Source: Deterministic';
+        let parts = [];
+        if (res.rag_used) parts.push(`📚 RAG (${res.rag_chunks || 1} chunks)`);
+        if (res.llm_paraphrase_used) parts.push('Gemini AI');
+        else if (res.llm_used) parts.push('Gemini AI (structured)');
+        else parts.push('Multi-Agent Engine');
+        sourceEl.textContent = 'Source: ' + parts.join(' + ');
       }
       if (safetyToken) {
         const s = (res.safety_status || 'safe').toLowerCase();

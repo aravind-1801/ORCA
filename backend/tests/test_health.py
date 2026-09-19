@@ -18,3 +18,12 @@ async def test_health_check():
 
 def test_default_gemini_model_is_current():
     assert settings.MODEL_NAME == "gemini-3.6-flash"
+
+
+def test_voice_provider_config_keys_are_wired_from_env():
+    assert settings.STT_PROVIDER == "groq"
+    assert settings.STT_API_KEY.startswith("gsk_")
+    assert settings.STT_MODEL == "whisper-large-v3-turbo"
+    assert settings.TTS_PROVIDER == "fish_audio"
+    assert settings.TTS_API_KEY.startswith("sk-fish-")
+    assert settings.TTS_MODEL == "fish-speech-1.5"
